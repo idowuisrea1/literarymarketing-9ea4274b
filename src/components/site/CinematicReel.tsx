@@ -20,7 +20,15 @@ export function CinematicReel({ onOpen }: { onOpen: (work: (typeof WORKS)[number
   const [webgl, setWebgl] = useState(false);
   const reduce = useReducedMotion();
 
-  const works = useMemo(() => WORKS.filter((work) => work.img || work.youtube).slice(0, 8), []);
+  const works = useMemo(() => {
+    const selected = WORKS.filter((work) => work.img || work.youtube).slice(0, 8);
+    // Existing eight entries are trailers; retain them and include the first
+    // image project so the requested image-only enhancement is reachable.
+    const firstImage = WORKS.find((work) => work.img && !work.youtube);
+    return firstImage && !selected.some((work) => work.img && !work.youtube)
+      ? [...selected, firstImage]
+      : selected;
+  }, []);
 
   useEffect(() => {
     const query = window.matchMedia(
@@ -65,7 +73,7 @@ export function CinematicReel({ onOpen }: { onOpen: (work: (typeof WORKS)[number
 
   if (!works.length) return null;
   const firstImageIndex = works.findIndex((work) => work.img && !work.youtube);
-  const displacementSource = assets["sp-memoirs"];
+  const displacementSource = works[firstImageIndex]?.img;
   const displacementTarget = assets["sp-cloak"];
 
   const content = (
