@@ -104,13 +104,9 @@ function RipplePlane({ src1, src2 }: { src1: string; src2: string }) {
 
 export default function DisplacementImage({ src1, src2, label }: { src1: string; src2: string; label: string }) {
   const [failed, setFailed] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const cleanupRef = useRef<(() => void) | null>(null);
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const fail = () => setFailed(true);
-    canvas.addEventListener("webglcontextlost", fail);
-    return () => canvas.removeEventListener("webglcontextlost", fail);
+    return () => cleanupRef.current?.();
   }, []);
   if (failed) throw new Error("Optional image WebGL context lost");
   return (
@@ -119,7 +115,12 @@ export default function DisplacementImage({ src1, src2, label }: { src1: string;
       orthographic
       camera={{ position: [0, 0, 1], zoom: 1 }}
       gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
-      onCreated={({ gl }) => { canvasRef.current = gl.domElement; }}
+      onCreated={({ gl }) => {
+        const canvas = gl.domElement;
+        const fail = () => setFailed(true);
+        canvas.addEventListener("webglcontextlost", fail);
+        cleanupRef.current = () => canvas.removeEventListener("webglcontextlost", fail);
+      }}
       fallback={<ContextFailure onFailure={() => setFailed(true)} />}
       style={{ position: "absolute", inset: 0 }}
       role="img"
