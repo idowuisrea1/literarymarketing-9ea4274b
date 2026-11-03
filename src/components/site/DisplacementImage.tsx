@@ -129,7 +129,6 @@ export default function DisplacementImage({
         canvas.addEventListener("webglcontextlost", fail);
         cleanupRef.current = () => canvas.removeEventListener("webglcontextlost", fail);
       }}
-      fallback={<ContextFailure onFailure={() => setFailed(true)} />}
       style={{ position: "absolute", inset: 0 }}
       role="img"
       aria-label={label}
@@ -137,11 +136,4 @@ export default function DisplacementImage({
       <RipplePlane src1={src1} src2={src2} />
     </Canvas>
   );
-}
-
-function ContextFailure({ onFailure }: { onFailure: () => void }) {
-  useEffect(() => {
-    onFailure();
-  }, [onFailure]);
-  return null;
 }
