@@ -1,7 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, ArrowLeft, ArrowRight, MoveHorizontal } from "lucide-react";
 import { WORKS } from "@/data/site";
+import assets from "@/assets/pf";
+import { VisualErrorBoundary } from "./VisualErrorBoundary";
+
+const LazyDisplacementImage = lazy(() => import("./DisplacementImage"));
 
 /**
  * A real scroll-linked gallery built from the site's existing portfolio assets.
@@ -13,15 +17,31 @@ export function CinematicReel({ onOpen }: { onOpen: (work: (typeof WORKS)[number
   const trackRef = useRef<HTMLDivElement>(null);
   const [compact, setCompact] = useState(true);
   const [travel, setTravel] = useState(0);
+  const [webgl, setWebgl] = useState(false);
   const reduce = useReducedMotion();
 
-  const works = useMemo(
-    () => WORKS.filter((work) => work.img || work.youtube).slice(0, 8),
-    [],
-  );
+  const works = useMemo(() => {
+    const selected = WORKS.filter((work) => work.img || work.youtube).slice(0, 8);
+    // Existing eight entries are trailers; retain them and include the first
+    // image project so the requested image-only enhancement is reachable.
+    const firstImage = WORKS.find((work) => work.img && !work.youtube);
+    return firstImage && !selected.some((work) => work.img && !work.youtube)
+      ? [...selected, firstImage]
+      : selected;
+  }, []);
 
   useEffect(() => {
-    const query = window.matchMedia("(max-width: 767px), (prefers-reduced-motion: reduce), (pointer: coarse)");
+    const query = window.matchMedia(
+      "(max-width: 767px), (prefers-reduced-motion: reduce), (pointer: coarse), (pointer: none), (hover: none)",
+    );
+    try {
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("webgl2");
+      setWebgl(Boolean(context));
+      context?.getExtension("WEBGL_lose_context")?.loseContext();
+    } catch {
+      setWebgl(false);
+    }
     const updateMode = () => setCompact(query.matches);
     const measure = () => {
       const track = trackRef.current;
@@ -45,29 +65,53 @@ export function CinematicReel({ onOpen }: { onOpen: (work: (typeof WORKS)[number
     offset: ["start start", "end end"],
   });
   const x = useTransform(scrollYProgress, [0, 1], [0, -travel]);
-  const tint = useTransform(scrollYProgress, [0, 0.5, 1], [
-    "rgba(139,92,246,0.04)",
-    "rgba(34,211,238,0.09)",
-    "rgba(139,92,246,0.12)",
-  ]);
+  const tint = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    ["rgba(139,92,246,0.04)", "rgba(34,211,238,0.09)", "rgba(139,92,246,0.12)"],
+  );
 
   if (!works.length) return null;
+  const firstImageIndex = works.findIndex((work) => work.img && !work.youtube);
+  const displacementSource = works[firstImageIndex]?.img;
+  const displacementTarget = assets["sp-cloak"];
 
   const content = (
     <motion.div
       ref={trackRef}
       {...(compact
-        ? { role: "region" as const, "aria-label": "Swipeable featured portfolio gallery", tabIndex: 0 }
+        ? {
+            role: "region" as const,
+            "aria-label": "Swipeable featured portfolio gallery",
+            tabIndex: 0,
+          }
         : {})}
       {...(!compact && !reduce ? { style: { x, backgroundColor: tint } } : {})}
-      className={compact
-        ? "flex w-full snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-5"
-        : "flex w-max gap-6 px-[8vw] will-change-transform"}
+      className={
+        compact
+          ? "flex w-full snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-5"
+          : "flex w-max gap-6 px-[8vw] will-change-transform"
+      }
     >
       {works.map((work, index) => {
         const image = work.youtube
           ? `https://i.ytimg.com/vi/${work.youtube}/hqdefault.jpg`
           : work.img;
+        const fallbackImage = image ? (
+          <motion.img
+            src={image}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="lm-cinematic-image h-full w-full object-cover"
+            initial={reduce ? false : { scale: 1.08, filter: "saturate(.72)" }}
+            whileInView={{ scale: 1, filter: "saturate(1)" }}
+            viewport={{ once: true, amount: 0.35 }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          />
+        ) : (
+          <div className="grid h-full place-items-center bg-aurora" />
+        );
         return (
           <motion.button
             key={work.id}
@@ -75,39 +119,55 @@ export function CinematicReel({ onOpen }: { onOpen: (work: (typeof WORKS)[number
             onClick={() => onOpen(work)}
             {...(reduce || compact ? {} : { whileHover: { y: -8, rotateY: -2, scale: 1.015 } })}
             whileTap={{ scale: 0.985 }}
-            className={compact
-              ? "lm-fluid-hover group relative w-[78vw] max-w-[420px] shrink-0 snap-center overflow-hidden rounded-3xl border border-white/15 bg-card text-left"
-              : "lm-fluid-hover group relative w-[min(68vw,560px)] shrink-0 overflow-hidden rounded-3xl border border-white/15 bg-card text-left"}
+            className={
+              compact
+                ? "lm-fluid-hover group relative w-[78vw] max-w-[420px] shrink-0 snap-center overflow-hidden rounded-3xl border border-white/15 bg-card text-left"
+                : "lm-fluid-hover group relative w-[min(68vw,560px)] shrink-0 overflow-hidden rounded-3xl border border-white/15 bg-card text-left"
+            }
             aria-label={`View ${work.title || "featured book project"} in portfolio`}
           >
             <div className="relative aspect-[4/3] overflow-hidden">
-              {image ? (
-                <motion.img
-                  src={image}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  className="lm-cinematic-image h-full w-full object-cover"
-                  initial={reduce ? false : { scale: 1.08, filter: "saturate(.72)" }}
-                  whileInView={{ scale: 1, filter: "saturate(1)" }}
-                  viewport={{ once: true, amount: 0.35 }}
-                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                />
+              {!compact &&
+              !reduce &&
+              webgl &&
+              index === firstImageIndex &&
+              displacementSource &&
+              displacementTarget ? (
+                <VisualErrorBoundary fallback={fallbackImage}>
+                  <Suspense fallback={fallbackImage}>
+                    <LazyDisplacementImage
+                      src1={displacementSource}
+                      src2={displacementTarget}
+                      label={work.title || "Book project"}
+                    />
+                  </Suspense>
+                </VisualErrorBoundary>
               ) : (
-                <div className="grid h-full place-items-center bg-aurora" />
+                fallbackImage
               )}
-              <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-90" />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-90"
+              />
               <span className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/35 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-white/80 backdrop-blur-md">
                 Chapter {String(index + 1).padStart(2, "0")}
               </span>
-              {work.youtube && <span className="absolute right-4 top-4 rounded-full bg-cyan/90 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-black">Film</span>}
+              {work.youtube && (
+                <span className="absolute right-4 top-4 rounded-full bg-cyan/90 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-black">
+                  Film
+                </span>
+              )}
               <span className="absolute bottom-4 left-5 right-5 font-serif text-2xl text-white sm:text-3xl">
                 {work.title || "Book project"}
               </span>
             </div>
             <div className="flex items-center justify-between gap-3 px-5 py-4">
-              <span className="text-xs text-muted-foreground">{work.author ? `by ${work.author}` : work.cat}</span>
-              <span className="inline-flex items-center gap-2 text-xs text-cyan">Explore project <ArrowRight className="h-3.5 w-3.5" /></span>
+              <span className="text-xs text-muted-foreground">
+                {work.author ? `by ${work.author}` : work.cat}
+              </span>
+              <span className="inline-flex items-center gap-2 text-xs text-cyan">
+                Explore project <ArrowRight className="h-3.5 w-3.5" />
+              </span>
             </div>
           </motion.button>
         );
@@ -121,7 +181,13 @@ export function CinematicReel({ onOpen }: { onOpen: (work: (typeof WORKS)[number
       aria-label="Cinematic portfolio story"
       className={compact || reduce ? "relative py-10" : "relative h-[280vh]"}
     >
-      <div className={compact || reduce ? "relative" : "sticky top-0 flex h-screen flex-col justify-center overflow-hidden"}>
+      <div
+        className={
+          compact || reduce
+            ? "relative"
+            : "sticky top-0 flex h-screen flex-col justify-center overflow-hidden"
+        }
+      >
         <div className="relative z-10 mx-auto mb-8 flex w-full max-w-7xl items-end justify-between gap-5 px-5">
           <div>
             <p className="mb-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan">
@@ -138,14 +204,17 @@ export function CinematicReel({ onOpen }: { onOpen: (work: (typeof WORKS)[number
             <ArrowLeft className="h-4 w-4" /> Scroll to explore <ArrowDown className="h-4 w-4" />
           </div>
         </div>
-        <div className={compact || reduce ? "relative" : "relative overflow-hidden"}>
-          {content}
-        </div>
+        <div className={compact || reduce ? "relative" : "relative overflow-hidden"}>{content}</div>
         {compact || reduce ? (
-          <p className="mt-3 px-5 text-xs text-muted-foreground">Swipe to explore the gallery. Select any project to open it.</p>
+          <p className="mt-3 px-5 text-xs text-muted-foreground">
+            Swipe to explore the gallery. Select any project to open it.
+          </p>
         ) : (
           <div className="mx-auto mt-5 h-px w-[min(84vw,900px)] overflow-hidden bg-white/10">
-            <motion.div className="h-full origin-left bg-gradient-to-r from-violet-400 via-cyan to-white" style={{ scaleX: scrollYProgress }} />
+            <motion.div
+              className="h-full origin-left bg-gradient-to-r from-violet-400 via-cyan to-white"
+              style={{ scaleX: scrollYProgress }}
+            />
           </div>
         )}
       </div>

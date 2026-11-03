@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
-import { ShaderMaterial, SRGBColorSpace, TextureLoader, Vector2 } from "three";
+import { ShaderMaterial, SRGBColorSpace, TextureLoader, Vector2, type Texture } from "three";
 
 /**
  * Categories 28 + 5 — Image displacement / ripple shader.
@@ -35,7 +35,8 @@ const FRAG = /* glsl */ `
     uv += normalize(toPtr + 0.0001) * ripple * 0.035;
 
     // crossfade with a slight directional wipe
-    float wipe = smoothstep(uProgress - 0.25, uProgress + 0.25, uv.x + ripple);
+    float edge = mix(-0.25, 1.25, uProgress);
+    float wipe = smoothstep(edge - 0.25, edge + 0.25, uv.x + ripple);
     vec4 a = texture2D(uTex1, uv);
     vec4 b = texture2D(uTex2, uv);
     gl_FragColor = mix(b, a, wipe);
@@ -69,10 +70,15 @@ function RipplePlane({ src1, src2 }: { src1: string; src2: string }) {
   useFrame((state, dt) => {
     const k = 1 - Math.exp(-6 * Math.min(dt, 0.05));
     const u = material.uniforms;
-    u["uProgress"]!.value += (target.current.progress - (u["uProgress"]!.value as number)) * k;
-    u["uStrength"]!.value += (target.current.strength - (u["uStrength"]!.value as number)) * k;
-    (u["uPointer"]!.value as Vector2).lerp(target.current.pointer, k);
-    u["uTime"]!.value = state.clock.elapsedTime;
+    const progress = u["uProgress"];
+    const strength = u["uStrength"];
+    const pointer = u["uPointer"];
+    const time = u["uTime"];
+    if (!progress || !strength || !pointer || !time) return;
+    progress.value += (target.current.progress - (progress.value as number)) * k;
+    strength.value += (target.current.strength - (strength.value as number)) * k;
+    (pointer.value as Vector2).lerp(target.current.pointer, k);
+    time.value = state.clock.elapsedTime;
   });
 
   return (
@@ -97,13 +103,33 @@ function RipplePlane({ src1, src2 }: { src1: string; src2: string }) {
   );
 }
 
-export default function DisplacementImage({ src1, src2, label }: { src1: string; src2: string; label: string }) {
+export default function DisplacementImage({
+  src1,
+  src2,
+  label,
+}: {
+  src1: string;
+  src2: string;
+  label: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  const cleanupRef = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    return () => cleanupRef.current?.();
+  }, []);
+  if (failed) throw new Error("Optional image WebGL context lost");
   return (
     <Canvas
       dpr={[1, 1.5]}
       orthographic
       camera={{ position: [0, 0, 1], zoom: 1 }}
       gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
+      onCreated={({ gl }) => {
+        const canvas = gl.domElement;
+        const fail = () => setFailed(true);
+        canvas.addEventListener("webglcontextlost", fail);
+        cleanupRef.current = () => canvas.removeEventListener("webglcontextlost", fail);
+      }}
       style={{ position: "absolute", inset: 0 }}
       role="img"
       aria-label={label}

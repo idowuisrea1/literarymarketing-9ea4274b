@@ -1,124 +1,64 @@
-# Literarymarketing 2050 — Implementation Audit
+# Literarymarketing — Current animation implementation audit
 
-Last updated: 2026-10-24
+Updated: 2026-11-03. This replaces historical PR/deployment claims with current source and checks from this session.
 
-## Scope inspected
+## Scope and status vocabulary
 
-### Routes
-- `/` — public landing page.
-- `/admin` — password-gated dashboard for orders, leads, and newsletter subscribers.
-- Root route fallback — branded 404 screen.
-- Root error boundary — retry/home recovery screen.
+Source inspected: existing `/` and `/admin`, site motion components, business-data imports, and leaf-route metadata. No routes, SEO, business copy, pricing, forms or backend/admin logic were changed. No dependency was added and nothing was published.
 
-The generated TanStack route tree currently declares only `/` and `/admin`. The public site is a single long-form landing page rather than a multi-page marketing site.
+Statuses: **IMPLEMENTED AND VERIFIED**, **IMPLEMENTED, NOT FULLY VERIFIED**, **NOT APPLICABLE WITH REASON**, **BLOCKED WITH EXACT REASON**. A verified status applies only to the specific browser checks stated in its evidence, not every device or failure mode. All other implemented effects remain NOT FULLY VERIFIED; simply seeing their code is not verification.
 
-### Public landing-page inventory
-- Global intro/logo loader and fixed header, desktop navigation, mobile drawer.
-- Hero / 3D book scene / floating reader cards / service marquee.
-- Why Authors Choose Us.
-- Services tab panel and eight-category service grid.
-- Portfolio category filters, paginated grid, media lightbox, YouTube trailers, and 3D featured-work orbit.
-- Case study split-screen story.
-- Three-step process.
-- Sample results dashboard and clearly labelled placeholder testimonials.
-- Pricing cards, package quiz, order modal and validation.
-- Founder/about section and FAQ accordion.
-- Free author-marketing checklist signup.
-- Contact form, strategy-call and WhatsApp links.
-- Footer newsletter signup, social links and mobile floating action bar.
+## 30-category matrix
 
-### Existing systems retained
-- React + TanStack Start/Router, TypeScript, Tailwind CSS.
-- Framer Motion, Three.js, React Three Fiber and Drei already present in dependencies.
-- Existing Supabase-backed leads, orders and newsletter flows; existing booking, WhatsApp, SEO and admin functions were not intentionally replaced in this motion pass.
-
-## 30-category implementation matrix
-
-Status values follow the requested vocabulary. “Implemented, not fully verified” means relevant code exists, but the full effect and cross-device behavior have not yet been browser-tested.
-
-| # | Category | Status | Evidence / limitation |
+| # | Category | Status | Current source evidence and limitations |
 |---:|---|---|---|
-| 1 | Cinematic scroll storytelling | IMPLEMENTED, NOT FULLY VERIFIED | Added a pinned desktop horizontal chapter reel using existing portfolio assets, scroll-linked translation and progress; touch/reduced-motion users get native horizontal snap scrolling. |
-| 2 | Interactive 3D worlds | IMPLEMENTED, NOT FULLY VERIFIED | Real React Three Fiber book scene with pointer-responsive rotation, floating motion, lighting and sparkles; desktop/lazy fallback exists. |
-| 3 | Kinetic typography | IMPLEMENTED, NOT FULLY VERIFIED | Hero headline reveals word-by-word with blur/vertical entrance and animated iridescent text. |
-| 4 | Scroll-controlled video | BLOCKED, WITH EXACT REASON | Existing trailers are external YouTube embeds and the repository has no owned, optimized local video or frame sequence. Scroll-scrubbing an external embed cannot be made reliable without an approved media source/API. Hover-to-video previews are implemented. |
-| 5 | Liquid and fluid transitions | IMPLEMENTED, NOT FULLY VERIFIED | Organic CSS shape morphing, geometric image masks and fluid-inspired gradient/ripple transitions; no heavy displacement shader was added. |
-| 6 | Magnetic and physics-based interactions | IMPLEMENTED, NOT FULLY VERIFIED | CTA controls have pointer magnetic movement; cards use perspective tilt; touch and reduced-motion fallbacks disable pointer-specific movement. |
-| 7 | Infinite horizontal worlds | IMPLEMENTED, NOT FULLY VERIFIED | Seamless service marquee, touch-scrollable category rail, and pinned desktop portfolio reel with native scroll-snap alternative on touch/reduced-motion devices. |
-| 8 | Particle transformations | IMPLEMENTED, NOT FULLY VERIFIED | Hero ambient particle field and genuine 3D sparkles. Text-to-particle or particle-to-logo transformations are not implemented. |
-| 9 | Advanced image reveals | IMPLEMENTED, NOT FULLY VERIFIED | Geometric clip-path reveal on portfolio images, founder portrait radial mask, layered image compositions and modal expansion. |
-| 10 | Reactive cursor experiences | IMPLEMENTED, NOT FULLY VERIFIED | Pointer-positioned ambient lighting and magnetic controls. No custom cursor is forced; touch and accessibility are prioritized. |
-| 11 | Cinematic page transitions | IMPLEMENTED, NOT FULLY VERIFIED | Short route-keyed fade/vertical transition between existing routes; browser URLs and TanStack navigation remain in place. |
-| 12 | Scroll-to-zoom experiences | IMPLEMENTED, NOT FULLY VERIFIED | Portfolio chapter cards scale into view within the pinned scroll sequence, layered with scroll-linked horizontal movement; no unnecessary 3D camera zoom was added. |
-| 13 | 3D image carousels | IMPLEMENTED, NOT FULLY VERIFIED | Accessible featured-work 3D orbit with previous/next buttons, live position text and reduced-motion single-card fallback. |
-| 14 | Split-screen storytelling | IMPLEMENTED, NOT FULLY VERIFIED | Responsive case-study and contact layouts; case-study visual sticks on desktop while the story cards reveal. |
-| 15 | Image-to-image morphing | IMPLEMENTED, NOT FULLY VERIFIED | Mask-driven, fluid-inspired transitions and scroll-sequenced image composition use real existing portfolio images. This is a morph-like visual transition, not semantic pixel morphing between arbitrary photos. |
-| 16 | Interactive lighting and shadows | IMPLEMENTED, NOT FULLY VERIFIED | 3D book has directional point lights and material response; global pointer atmosphere, glass panels and hover shadows add depth. |
-| 17 | Morphing SVG illustrations | IMPLEMENTED, NOT FULLY VERIFIED | SVG sparkline path draws on scroll. Actual path-to-path morphing/logo assembly is not implemented. |
-| 18 | Liquid typography | IMPLEMENTED, NOT FULLY VERIFIED | Iridescent animated gradient and masked kinetic word entrances; no shader-based liquid distortion is used. |
-| 19 | Interactive configurators | IMPLEMENTED, NOT FULLY VERIFIED | Existing package quiz, package selection/order modal, service tabs and category filters update real displayed selections. |
-| 20 | Layered depth and parallax | IMPLEMENTED, NOT FULLY VERIFIED | Layered hero portal/orbits/cards, floating book and perspective tilt; no aggressive scroll parallax. |
-| 21 | Scroll-triggered scene transformations | IMPLEMENTED, NOT FULLY VERIFIED | Reveals, drawn SVG line, counters and sticky case-study composition change as sections enter view. |
-| 22 | Cinematic loading and logo assembly | IMPLEMENTED, NOT FULLY VERIFIED | Existing short logo loader and staggered hero entrance retained. Loader duration and first-visit behavior still require browser validation. |
-| 23 | Hover-to-video transformations | IMPLEMENTED, NOT FULLY VERIFIED | YouTube portfolio cards mount muted, looping privacy-enhanced embeds only on fine-pointer hover; click/touch still opens the full modal. |
-| 24 | Infinite visual canvas | NOT APPLICABLE, WITH REASON | Existing portfolio is a semantic, filterable gallery with keyboard/touch controls. A freeform pan/zoom canvas would make the same essential content less accessible. |
-| 25 | Animated bento grids | IMPLEMENTED, NOT FULLY VERIFIED | Service cards and portfolio grid use staggered reveals, layout transitions, hover depth and responsive columns. |
-| 26 | Interactive typography tracking | IMPLEMENTED, NOT FULLY VERIFIED | Responsive oversized headline, word reveals and animated gradient. Pointer-variable font tracking is not implemented. |
-| 27 | Scroll velocity effects | IMPLEMENTED, NOT FULLY VERIFIED | Global motion director measures scroll velocity and subtly modulates ambient light; it does not hijack or alter scroll behavior. |
-| 28 | Image displacement and ripple | IMPLEMENTED, NOT FULLY VERIFIED | CSS radial ripple/light overlay plus geometric clip-path reveal provide a lightweight fallback; no displacement-map WebGL shader is claimed. |
-| 29 | Interactive sound design | NOT APPLICABLE, WITH REASON | No original audio assets or audio-led content exists. The experience remains silent by default; no forced or autoplay audio was added. |
-| 30 | Living backgrounds | IMPLEMENTED, NOT FULLY VERIFIED | Animated gradient/orbit/particle hero, subtle pointer-reactive ambient light and grain texture; overlays are pointer-transparent and hidden on coarse pointers/reduced motion. |
+| 1 | Cinematic scroll storytelling | IMPLEMENTED, NOT FULLY VERIFIED | `CinematicReel` uses a finite pinned desktop horizontal reel and native compact scroll-snap fallback. The image card and its modal were exercised, but the entire chapter progression was not visually reviewed. Existing eight trailers are retained; a ninth existing image project is appended because the previous eight contained no image-type card. Existing “01—08” copy is retained, so it now understates the card count. |
+| 2 | Interactive 3D worlds | IMPLEMENTED, NOT FULLY VERIFIED | `Book3D` supplies the hero's lazy R3F book scene. Its full rendering, controls and failure handling were not targeted in this browser run. |
+| 3 | Kinetic typography | IMPLEMENTED, NOT FULLY VERIFIED | Hero word entrances and `KineticHeading` real DOM text. No dedicated typography visual test. |
+| 4 | Scroll-controlled video / image-sequence alternative | IMPLEMENTED, NOT FULLY VERIFIED | `ScrollStory` is rendered inside `CaseStudy`: existing portfolio images crossfade on a 2D canvas with scroll progress, with stacked static chapters for small/coarse/reduced-motion environments. This is an image sequence, NOT scrubbed video. Browser reported a Motion target-ref hydration error; the sequence was not verified. Literal scroll-controlled video is unavailable because there is no owned video source. |
+| 5 | Liquid and fluid transitions | IMPLEMENTED, NOT FULLY VERIFIED | SVG morphology, CSS fluid treatment, and the one-card WebGL ripple/crossfade exist. The ripple rendered, but this broad category was not comprehensively tested. |
+| 6 | Magnetic and physics-based interactions | IMPLEMENTED, NOT FULLY VERIFIED | `GlowButton`/`GlowLink` magnetic movement and `Tilt` fine-pointer/reduced-motion gates; not a general physics engine. Not individually tested. |
+| 7 | Infinite horizontal worlds | IMPLEMENTED, NOT FULLY VERIFIED | Marquee and horizontally navigable reel/rails. The reel itself is finite; no unbounded world is claimed. |
+| 8 | Particle transformations | IMPLEMENTED, NOT FULLY VERIFIED | `ParticleLogo` samples opaque logo pixels into spring-driven canvas particles, pointer repulsion and reformation; wired into `LogoLoader`. Static image on reduced motion/context/image-read failure. Coarse-pointer gating is NOT present despite the source comment, and logo aspect/color fidelity was not checked. |
+| 9 | Advanced image reveals | IMPLEMENTED, NOT FULLY VERIFIED | Portfolio clip-path/image styling, reel image entrances and founder mask. Full reveal behavior not individually checked. |
+| 10 | Reactive cursor experiences | IMPLEMENTED, NOT FULLY VERIFIED | `MotionDirector`, pointer-aware headings and magnetic controls. No forced custom cursor. Not individually verified. |
+| 11 | Cinematic page transitions | IMPLEMENTED, NOT FULLY VERIFIED | Root motion wrapper/AnimatePresence between existing routes. No route-transition browser check this session. |
+| 12 | Scroll-to-zoom experiences | IMPLEMENTED, NOT FULLY VERIFIED | Reel images scale on entering view and ScrollStory crossfade scale changes. This is not a continuous 3D camera zoom system; sequence unverified. |
+| 13 | 3D image carousels | IMPLEMENTED, NOT FULLY VERIFIED | Portfolio CSS perspective orbit with previous/next controls and reduced-motion handling. Retained untouched; not directly exercised. |
+| 14 | Split-screen storytelling | IMPLEMENTED, NOT FULLY VERIFIED | Existing responsive case-study/contact layouts, desktop sticky visual. Not directly exercised. |
+| 15 | Image-to-image morphing | IMPLEMENTED, NOT FULLY VERIFIED | Displacement shader blends the first image card's original Mały Przyjaciel asset into the existing Cloak King asset; ScrollStory blends chapters. This is ripple/crossfade, not semantic photo morphing. Full transition endpoints not visually compared. |
+| 16 | Interactive lighting and shadows | IMPLEMENTED, NOT FULLY VERIFIED | Book scene lighting, MotionDirector pointer atmosphere and card shadows. Not individually verified. |
+| 17 | Morphing SVG illustrations | IMPLEMENTED, NOT FULLY VERIFIED | `MorphRing` has three paths with matching M + four cubic-curve + Z structure, interpolated `d`, plus scroll path drawing behind Process icons. `DrawnDivider` is exported but not rendered. Rings not individually verified; reduced motion suppresses the morph timer but initial path drawing remains. |
+| 18 | Liquid typography | IMPLEMENTED, NOT FULLY VERIFIED | `KineticHeading` uses feTurbulence/feDisplacementMap on hover, animating distortion back to zero and retaining DOM text. Fine-pointer/reduced-motion gates. Repeated fixed SVG filter ID may affect multiple headings; not individually verified. |
+| 19 | Interactive configurators | IMPLEMENTED, NOT FULLY VERIFIED | Existing quiz, service tabs, package ordering and filters. These are selection flows, not a 3D product configurator. Orders/forms were not submitted. |
+| 20 | Layered depth and parallax | IMPLEMENTED, NOT FULLY VERIFIED | Hero layered scene, perspective orbit and Tilt. No broad parallax verification. |
+| 21 | Scroll-triggered scene transformations | IMPLEMENTED, NOT FULLY VERIFIED | Reveal, scroll-linked reel, SVG drawing and ScrollStory chapter selection. Sequence ref error prevents a clean whole-site verification claim. |
+| 22 | Cinematic loading and logo assembly | IMPLEMENTED, NOT FULLY VERIFIED | `LogoLoader` renders ParticleLogo, schedules dismissal after 1400ms, and accepts click/Enter/Space/Escape to skip. Source confirms this; timing/skip/particle assembly were not individually tested. |
+| 23 | Hover-to-video transformations | IMPLEMENTED, NOT FULLY VERIFIED | Existing fine-pointer YouTube hover iframe previews with reduced-motion suppression. Click still opens media modal. Some external resources returned 404; playback not verified. |
+| 24 | Infinite visual canvas | IMPLEMENTED AND VERIFIED | Optional React.lazy/Suspense ExploreCanvas; Gallery remains default. Browser exercised toggle, zoom in/out, reset, keyboard pan, item opening existing dialog, Escape back to Gallery, and retained Load More (18 of 35). Mobile 390px canvas rendered with no page horizontal overflow. It is finite portfolio content with freeform panning, not infinite content. Mouse drag and all keyboard-focus paths not exhaustively checked. |
+| 25 | Animated bento grids | IMPLEMENTED, NOT FULLY VERIFIED | Existing service grids/reveals and portfolio layout animation. These are ordinary responsive grids rather than a dedicated irregular bento engine. |
+| 26 | Interactive typography tracking | IMPLEMENTED, NOT FULLY VERIFIED | `KineticHeading` changes letterSpacing and gentle skew from pointer proximity. No variable font-weight or scroll-driven tracking exists. Not individually verified. |
+| 27 | Scroll velocity effects | IMPLEMENTED, NOT FULLY VERIFIED | `MotionDirector` scroll-velocity instrumentation and atmosphere. Visible velocity response not individually verified. |
+| 28 | Image displacement and ripple | IMPLEMENTED AND VERIFIED | One lazy R3F image enhancement in the first image-type reel card only; gated by noncompact/fine-pointer/non-reduced-motion/WebGL2 support. Browser rendered a nonblank image canvas, hovered it and opened the existing modal. Deliberate context loss selected the original motion.img fallback; fallback screenshot confirmed the image and label. Mobile/reduced-motion contexts mounted no reel WebGL canvas. Texture/CORS failure handling is present through the error boundary but those failures were not separately injected. |
+| 29 | Interactive sound design | IMPLEMENTED, NOT FULLY VERIFIED | `sound.ts` synthesizes hover/select/confirm cues and a soft ambient oscillator; header SoundToggle includes aria-pressed and volume slider. Defaults OFF on fresh storage, stores explicit opt-in, restores previous opt-in. Audio can resume on a later visit after stored opt-in; no audio files. No listening/audio browser verification, and complete audio-context/node teardown is not demonstrated. |
+| 30 | Living backgrounds | IMPLEMENTED, NOT FULLY VERIFIED | Hero animation, global atmosphere and grain; accessibility/performance behavior not comprehensively verified. |
 
-## Changes in this pass
+## Checks actually executed
 
-- Added `src/components/site/MotionDirector.tsx`: shared scroll progress, low-cost pointer atmosphere and scroll-velocity measurement with listener/RAF cleanup.
-- Updated `src/routes/__root.tsx`: mount the motion director on every route and add short, reduced-motion-aware route transitions.
-- Updated `src/styles.css`: global motion instrumentation, geometric image masks and reduced-motion fallbacks.
-- Updated `src/components/site/primitives.tsx`: magnetic CTA movement and reduced-motion/coarse-pointer-aware card tilt.
-- Updated `src/components/site/Portfolio.tsx`: featured 3D orbit with accessible controls, reduced-motion fallback, geometric image reveals and hover-only muted YouTube previews.
-- Updated `src/components/site/Extras.tsx`: sticky desktop case-study visual with organic animated light field for split-screen storytelling.
-- Added `src/components/site/CinematicReel.tsx`: scroll-linked pinned portfolio chapters on desktop, native horizontal scroll-snap on touch/reduced-motion, scroll progress, masked image reveals and selection into the existing portfolio modal.
-- Updated `src/components/site/Portfolio.tsx`: integrated the cinematic reel without removing the existing filterable gallery or 3D orbit.
-- Updated `src/styles.css`: organic fluid-shape animation and CSS ripple/mask fallback.
-- Added `src/components/site/Portfolio.test.ts`: unit tests for existing portfolio title normalization.
-- Added `.github/workflows/quality.yml`: automated Bun install, production build, lint and test checks.
-- Updated `src/components/site/Hero.tsx`: removed the decorative animated “98%” metric and replaced it with a non-numeric “SYNC” label to avoid implying an unsupported performance claim.
-- Updated `src/routes/admin.tsx`: stagger dashboard data sections.
+- **Automatic harness typecheck/build:** not invoked manually (environment requires automatic checks). Latest observed diagnostics after source changes report `build OK`. Initial introduced override-modifier errors in VisualErrorBoundary were observed and corrected. This is not a separately observed production `vite build` command.
+- **`bun run lint`: FAILED**, exit 1; 683 reported problems (672 errors, 11 warnings) on the first run, predominantly existing Prettier formatting errors across the repository. No unrelated files were reformatted.
+- **`bunx prettier --write src/components/site/Portfolio.tsx src/components/site/CinematicReel.tsx src/components/site/DisplacementImage.tsx src/components/site/VisualErrorBoundary.tsx`: completed.** Formatting only in the changed TSX files.
+- **`bunx eslint src/components/site/Portfolio.tsx src/components/site/CinematicReel.tsx src/components/site/DisplacementImage.tsx src/components/site/VisualErrorBoundary.tsx`: PASSED**, exit 0; zero errors, one existing react-refresh export warning for Portfolio's cleanTitle helper.
+- **`bunx vitest run`: FAILED**, exit 1; 2 test files passed, 1 failed; 10 tests passed, 1 failed. Existing cleanTitle test expects “The Rose of Death” but receives “The Rose of Death —”. The unchanged title-normalization regex omits the em dash. Left unchanged because the scope prohibits rewriting existing copy/content behavior.
+- **`python3 /tmp/browser/motion/check_motion.py`: final run PASSED**, exit 0. Fresh Chromium at 1280×1800, separate reduced-motion 1280×1800 and touch/mobile 390×844 contexts. Software WebGL flags enabled for graphics verification. Exercised the central new view/modal/reel failure paths described in categories 24 and 28. Screenshots inspected for mobile canvas, dialog, ripple and recovered image.
+- Manual `bunx tsgo --noEmit` / `bun run build`: **NOT RUN**, because this environment delegates those checks to the automatic harness.
 
-No new package dependency or third-party animation library was added.
+## Known remaining limitations
 
-## Verification state
-
-- Repository/route inventory: inspected through GitHub source files.
-- TypeScript build, lint, automated tests and browser interaction tests: **not yet run in this pass**.
-- Mobile, keyboard, reduced-motion, screen-reader and low-power-device checks: **not yet fully verified**.
-- Existing data flows and integrations: source-inspected, not end-to-end submitted during this pass.
-- GitHub branch/PR and Lovable sync/deployment: record the final state in the delivery report after those operations complete.
-
-
-## Repository, synchronization and deployment record
-
-- GitHub repository: `idowuisrea1/literarymarketing-868a0435`, default branch `main`.
-- Earlier motion-system PR: [#2](https://github.com/idowuisrea1/literarymarketing-868a0435/pull/2), merge commit `7db7cb7976fbc5d8a01a4a933a7003f09fd95c6a`.
-- Cinematic reel / quality workflow PR: [#3](https://github.com/idowuisrea1/literarymarketing-868a0435/pull/3), merged as `89397c45f9e94081935557b170e09926f1a71da6`.
-- Latest audit documentation update is made directly on `main`; see repository history for the current HEAD.
-- Lovable project ID: `0f75a16d-fb8d-40ff-8416-9e923389b309`.
-- Lovable source visibility: **PARTIALLY VERIFIED** — reading the new `src/components/site/CinematicReel.tsx` and `.github/workflows/quality.yml` via the Lovable project using ref `main` returned the expected GitHub content. However, `get_project.latest_commit_sha` still reports the prior commit `7285b07dd5ac9fbe631959f93618b79f64f9f7dd`; metadata has not caught up, so full synchronization is not declared.
-- GitHub Actions: quality workflow added (Bun install, build, lint, tests), but the connector returned no workflow runs or commit statuses for the PR head or merge commit. **No successful build/lint/test result is claimed.**
-- Production deployment: **NOT VERIFIED for the newest changes.** The project reports published, but the current build is not confirmed deployed. A new publish request and its result must be checked separately.
-- Browser QA: no automated desktop/mobile browser session or console inspection was available in this pass. Touch/reduced-motion behavior is implemented in code but not yet fully tested.
-
-
-## Final source-head addendum
-
-- After PR #3 merged, two small source refinements were committed directly to `main`: keyboard-focusable labelling for the touch gallery (`928613c8875568826a4f64e2e413f835f7952bec`) and reduced-motion-aware headline tracking (`5c7a3d059cf10f4abedc6300e90d248f6461f314`).
-- The scroll-video limitation was then clarified in this audit (`0db02ba61e623008597873de5d2bd495f9d767de`).
-- A final audit-only PR is being used to create a clean, reviewable synchronization point after those commits; it does not alter the site’s business data or remove content.
-- Current source contains the cinematic reel and all changes described above. The newest publish request returned deployment ID `5a369031-325b-446e-8308-59b3e79bde7d` with status `pending`, after Lovable's reported source commit advanced to `0db02ba61e623008597873de5d2bd495f9d767de`. That source commit includes the new cinematic reel, keyboard/touch refinement, and kinetic headline tracking. The hosting tool did not expose a deployment-status lookup, so completion remains unconfirmed.
-- Local build execution is blocked in this session because the container could not resolve `github.com` for a clone, and GitHub's workflow/status tools returned no runs or statuses. The CI workflow is committed, but a green result has not been observed.
-
-
-## Content preservation follow-up
-
-- Restored the original hero service description, “We Turn Stories into Social Movements” / “We Turn Readers into Superfans” messaging, and original CTA labels inside the cinematic redesign.
-- Restored the original service marquee labels (Book Trailers, BookTok, Email Funnels, Websites, Cover Design) alongside the newer thematic labels. The redesigned headline and visual treatment remain in place.
+- Browser page-error event: `Target ref is defined but not hydrated` from Motion scroll-ref handling. Existing ScrollStory conditionally omits its target while displaying static chapters; source supports this as a likely cause, but no stack-based repair was performed in this narrowly scoped pass.
+- Browser console also recorded hydration-attribute mismatch warnings and external-resource 404 responses. Deliberate WebGL context loss generated an expected caught React error; the fallback recovered successfully. The session is NOT console-error-free.
+- Gallery title-normalization test failure and repository-wide formatting lint failures remain as reported above.
+- Gallery canvas Escape also exits the canvas when bubbling from the existing modal; Escape closes the modal and returns to gallery in the exercised flow. No existing lightbox behavior was rewritten.
+- First image appended to the reel uses two existing asset-map URLs; original eight reel entries, card actions, labels, orbit, lightbox and Load More are retained.
+- No database submissions, authenticated admin readback, booking navigation, checklist email delivery, full screen-reader audit, Lighthouse run, low-power hardware test, exhaustive drag test or production deployment was performed.
+- Current leaf metadata was source-inspected: `/` and `/admin` each retain unique title, description, og:title, og:description, og:type and twitter:card. Neither uses a meaningful absolute hero asset URL requiring image tags. No SEO edits were made.
