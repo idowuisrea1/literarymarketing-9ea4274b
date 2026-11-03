@@ -1,7 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, ArrowLeft, ArrowRight, MoveHorizontal } from "lucide-react";
 import { WORKS } from "@/data/site";
+import assets from "@/assets/pf";
+import { VisualErrorBoundary } from "./VisualErrorBoundary";
+
+const LazyDisplacementImage = lazy(() => import("./DisplacementImage"));
 
 /**
  * A real scroll-linked gallery built from the site's existing portfolio assets.
@@ -13,6 +17,7 @@ export function CinematicReel({ onOpen }: { onOpen: (work: (typeof WORKS)[number
   const trackRef = useRef<HTMLDivElement>(null);
   const [compact, setCompact] = useState(true);
   const [travel, setTravel] = useState(0);
+  const [webgl, setWebgl] = useState(false);
   const reduce = useReducedMotion();
 
   const works = useMemo(
@@ -21,7 +26,15 @@ export function CinematicReel({ onOpen }: { onOpen: (work: (typeof WORKS)[number
   );
 
   useEffect(() => {
-    const query = window.matchMedia("(max-width: 767px), (prefers-reduced-motion: reduce), (pointer: coarse)");
+    const query = window.matchMedia("(max-width: 767px), (prefers-reduced-motion: reduce), (pointer: coarse), (pointer: none), (hover: none)");
+    try {
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("webgl2");
+      setWebgl(Boolean(context));
+      context?.getExtension("WEBGL_lose_context")?.loseContext();
+    } catch {
+      setWebgl(false);
+    }
     const updateMode = () => setCompact(query.matches);
     const measure = () => {
       const track = trackRef.current;
@@ -52,6 +65,9 @@ export function CinematicReel({ onOpen }: { onOpen: (work: (typeof WORKS)[number
   ]);
 
   if (!works.length) return null;
+  const firstImageIndex = works.findIndex((work) => work.img && !work.youtube);
+  const displacementSource = assets["sp-memoirs"];
+  const displacementTarget = assets["sp-cloak"];
 
   const content = (
     <motion.div
@@ -68,6 +84,19 @@ export function CinematicReel({ onOpen }: { onOpen: (work: (typeof WORKS)[number
         const image = work.youtube
           ? `https://i.ytimg.com/vi/${work.youtube}/hqdefault.jpg`
           : work.img;
+        const fallbackImage = image ? (
+          <motion.img
+            src={image}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="lm-cinematic-image h-full w-full object-cover"
+            initial={reduce ? false : { scale: 1.08, filter: "saturate(.72)" }}
+            whileInView={{ scale: 1, filter: "saturate(1)" }}
+            viewport={{ once: true, amount: 0.35 }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          />
+        ) : <div className="grid h-full place-items-center bg-aurora" />;
         return (
           <motion.button
             key={work.id}
@@ -81,22 +110,14 @@ export function CinematicReel({ onOpen }: { onOpen: (work: (typeof WORKS)[number
             aria-label={`View ${work.title || "featured book project"} in portfolio`}
           >
             <div className="relative aspect-[4/3] overflow-hidden">
-              {image ? (
-                <motion.img
-                  src={image}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  className="lm-cinematic-image h-full w-full object-cover"
-                  initial={reduce ? false : { scale: 1.08, filter: "saturate(.72)" }}
-                  whileInView={{ scale: 1, filter: "saturate(1)" }}
-                  viewport={{ once: true, amount: 0.35 }}
-                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                />
-              ) : (
-                <div className="grid h-full place-items-center bg-aurora" />
-              )}
-              <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-90" />
+              {!compact && !reduce && webgl && index === firstImageIndex && displacementSource && displacementTarget ? (
+                <VisualErrorBoundary fallback={fallbackImage}>
+                  <Suspense fallback={fallbackImage}>
+                    <LazyDisplacementImage src1={displacementSource} src2={displacementTarget} label={work.title || "Book project"} />
+                  </Suspense>
+                </VisualErrorBoundary>
+              ) : fallbackImage}
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-90" />
               <span className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/35 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-white/80 backdrop-blur-md">
                 Chapter {String(index + 1).padStart(2, "0")}
               </span>

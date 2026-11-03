@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Play, X, Clapperboard, ChevronLeft, ChevronRight, Orbit } from "lucide-react";
 import { CATEGORIES, WORKS, type Work } from "@/data/site";
@@ -6,6 +6,7 @@ import { GlowButton, Reveal, SectionHead, Tilt } from "./primitives";
 import { cn } from "@/lib/utils";
 import { CinematicReel } from "./CinematicReel";
 
+const LazyExploreCanvas = lazy(() => import("./ExploreCanvas").then((module) => ({ default: module.ExploreCanvas })));
 const PAGE = 9;
 
 /** Remove marketing extras from a YouTube title so only the book name stays. */
@@ -82,6 +83,7 @@ export function Portfolio() {
   const [open, setOpen] = useState<Work | null>(null);
   const [shown, setShown] = useState(PAGE);
   const [orbitIndex, setOrbitIndex] = useState(0);
+  const [canvasView, setCanvasView] = useState(false);
   const reduce = useReducedMotion();
   const orbitWorks = useMemo(() => WORKS.filter((w) => w.img || w.youtube).slice(0, 5), []);
   const all = useMemo(() => (cat === "All" ? WORKS : WORKS.filter((w) => w.cat === cat)), [cat]);
@@ -142,6 +144,15 @@ export function Portfolio() {
         </div>
       </Reveal>
 
+      <div role="group" aria-label="Portfolio view" className="mx-auto mb-6 flex max-w-7xl flex-wrap justify-center gap-2">
+        <GlowButton variant={canvasView ? "ghost" : "gold"} aria-pressed={!canvasView} onClick={() => setCanvasView(false)}>Gallery</GlowButton>
+        <GlowButton variant={canvasView ? "gold" : "ghost"} aria-pressed={canvasView} onClick={() => setCanvasView(true)}>Explore canvas</GlowButton>
+      </div>
+      {canvasView ? (
+        <Suspense fallback={<p role="status" className="py-8 text-center text-muted-foreground">Loading portfolio…</p>}>
+          <LazyExploreCanvas onOpen={setOpen} onExit={() => setCanvasView(false)} />
+        </Suspense>
+      ) : <>
       <motion.div layout className="mx-auto grid max-w-7xl grid-cols-1 gap-5 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <AnimatePresence mode="popLayout">
           {items.map((w) => (
@@ -157,6 +168,7 @@ export function Portfolio() {
           <p className="mt-2 text-xs text-muted-foreground">Showing {items.length} of {all.length}</p>
         </div>
       )}
+      </>}
 
       <AnimatePresence>
         {open && (

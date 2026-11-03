@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep the portfolio gallery as the default; lazy-load its optional exploration view and share the existing lightbox so navigation and media behavior stay consistent.
+- Lazy-load optional WebGL image enhancements behind capability checks and a visual error boundary; preserve the original image when rendering or texture loading fails.
