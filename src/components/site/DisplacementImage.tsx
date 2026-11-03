@@ -35,7 +35,8 @@ const FRAG = /* glsl */ `
     uv += normalize(toPtr + 0.0001) * ripple * 0.035;
 
     // crossfade with a slight directional wipe
-    float wipe = smoothstep(uProgress - 0.25, uProgress + 0.25, uv.x + ripple);
+    float edge = mix(-0.25, 1.25, uProgress);
+    float wipe = smoothstep(edge - 0.25, edge + 0.25, uv.x + ripple);
     vec4 a = texture2D(uTex1, uv);
     vec4 b = texture2D(uTex2, uv);
     gl_FragColor = mix(b, a, wipe);
