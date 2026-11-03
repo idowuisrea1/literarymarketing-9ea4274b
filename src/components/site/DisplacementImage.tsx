@@ -102,7 +102,15 @@ function RipplePlane({ src1, src2 }: { src1: string; src2: string }) {
   );
 }
 
-export default function DisplacementImage({ src1, src2, label }: { src1: string; src2: string; label: string }) {
+export default function DisplacementImage({
+  src1,
+  src2,
+  label,
+}: {
+  src1: string;
+  src2: string;
+  label: string;
+}) {
   const [failed, setFailed] = useState(false);
   const cleanupRef = useRef<(() => void) | null>(null);
   useEffect(() => {
@@ -132,6 +140,8 @@ export default function DisplacementImage({ src1, src2, label }: { src1: string;
 }
 
 function ContextFailure({ onFailure }: { onFailure: () => void }) {
-  useEffect(() => { onFailure(); }, [onFailure]);
+  useEffect(() => {
+    onFailure();
+  }, [onFailure]);
   return null;
 }
