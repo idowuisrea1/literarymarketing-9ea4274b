@@ -52,3 +52,20 @@ export const CASE_STUDY_RESULT = "[Add a real result, e.g. clicks, saves, sales]
 // Until a real Calendly link is added above, "Book a Call" buttons open WhatsApp instead.
 export const isPlaceholder = (url: string) => url.includes("YOUR-");
 export const BOOKING_URL = isPlaceholder(CONTACT.calendly) ? CONTACT.whatsapp : CONTACT.calendly;
+
+// ---------------------------------------------------------------------------
+// TRUST CONTENT — leave these lists EMPTY until you have REAL, permitted data.
+// Empty lists hide their section on the website (nothing fake is shown).
+// ---------------------------------------------------------------------------
+
+// Real client quotes, e.g. { quote: "…", name: "Jane Doe", role: "Fantasy Novelist" }
+export const TESTIMONIALS: { quote: string; name: string; role: string }[] = [];
+
+// Real campaign numbers, e.g. { label: "Pre-orders", value: 1340, suffix: "", decimals: 0 }
+export const RESULT_METRICS: { label: string; value: number; suffix?: string; decimals?: number }[] = [];
+
+// Real founder stats shown beside the portrait, e.g. { value: "50+", label: "Books promoted" }
+export const ABOUT_STATS: { value: string; label: string }[] = [];
+
+/** True when a text is still a "[Add …]" placeholder or a "YOUR-" link. */
+export const isPlaceholderText = (s: string) => !s.trim() || s.trim().startsWith("[") || s.includes("YOUR-");
