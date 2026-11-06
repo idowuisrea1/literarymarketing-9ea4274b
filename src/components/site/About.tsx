@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Award, BookOpen, Users, Plus } from "lucide-react";
 import a from "@/assets/pf";
+import { ABOUT_STATS } from "@/config/site";
 import { BOOKING_URL, CONTACT, FAQS } from "@/data/site";
 import { GlowLink, Reveal, SectionHead } from "./primitives";
 
@@ -15,11 +16,11 @@ export function About() {
             <img src={a["founder"]} alt="Idowu Isreal Agboola, founder of literarymarketing, in a navy double-breasted suit" loading="lazy" width={900} height={1350}
               className="relative w-full [mask-image:radial-gradient(70%_65%_at_50%_42%,#000_55%,transparent_100%)]" />
           </div>
-          {[{ i: BookOpen, t: "50+", l: "Books promoted" }, { i: Users, t: "30+", l: "Authors served" }, { i: Award, t: "5★", l: "Avg. rating" }].map((b, k) => (
+          {ABOUT_STATS.slice(0, 3).map((x, k) => ({ i: [BookOpen, Users, Award][k]!, t: x.value, l: x.label })).map((b, k) => (
             <motion.div key={b.l} initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 + k * 0.15 }}
               className={`glass absolute flex items-center gap-2 rounded-2xl px-3 py-2 ${["left-0 top-[18%]", "right-0 top-[45%]", "left-[6%] bottom-[12%]"][k]}`}>
               <b.i className="h-5 w-5 text-gold" />
-              <div><p className="font-mono text-lg font-bold leading-none">{b.t}</p><p className="text-[10px] text-muted-foreground">{b.l} · sample</p></div>
+              <div><p className="font-mono text-lg font-bold leading-none">{b.t}</p><p className="text-[10px] text-muted-foreground">{b.l}</p></div>
             </motion.div>
           ))}
         </Reveal>

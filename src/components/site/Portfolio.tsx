@@ -1,7 +1,11 @@
+import { trackEvent } from "@/lib/analytics";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Play, X, Clapperboard, ChevronLeft, ChevronRight, Orbit } from "lucide-react";
-import { CATEGORIES, WORKS, type Work } from "@/data/site";
+import { CATEGORIES as ALL_CATS, WORKS as ALL_WORKS, type Work } from "@/data/site";
+// Hide "coming soon" items (no image or video yet) and any filter left empty.
+const WORKS = ALL_WORKS.filter((w) => w.img || w.youtube);
+const CATEGORIES = ALL_CATS.filter((c) => c === "All" || WORKS.some((w) => w.cat === c));
 import { GlowButton, Reveal, SectionHead, Tilt } from "./primitives";
 import { cn } from "@/lib/utils";
 import { CinematicReel } from "./CinematicReel";
@@ -159,6 +163,7 @@ export function Portfolio() {
             key={c}
             onClick={() => {
               setCat(c);
+              trackEvent("portfolio_filter", { category: c });
               setShown(PAGE);
             }}
             className={cn(

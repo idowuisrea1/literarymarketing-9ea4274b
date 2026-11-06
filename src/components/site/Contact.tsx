@@ -1,44 +1,19 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Mail, MessageCircle, Phone, Camera as Instagram, Briefcase as Linkedin, PlayCircle as Youtube, AtSign as Twitter, Music2 } from "lucide-react";
+import { Mail, MessageCircle, Phone, Camera as Instagram, Briefcase as Linkedin, PlayCircle as Youtube, AtSign as Twitter, Music2 } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/pf/logo.png.asset.json";
-import { BOOKING_URL, CONTACT, GENRES, SERVICES_LIST, isPlaceholder } from "@/data/site";
+import { BOOKING_URL, CONTACT, isPlaceholder } from "@/data/site";
 import { GlowButton, GlowLink, Reveal, SectionHead } from "./primitives";
+import { EnquiryFlow } from "./EnquiryFlow";
+import { trackEvent } from "@/lib/analytics";
 import { fieldCls } from "./Pricing";
 
-const leadSchema = z.object({
-  name: z.string().trim().min(1, "Please enter your name").max(120),
-  email: z.string().trim().email("Please enter a valid email").max(255),
-  genre: z.string().max(100).optional(),
-  service: z.string().max(100).optional(),
-  details: z.string().trim().max(3000).optional(),
-});
-
 export function Contact() {
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
-  const [service, setService] = useState("");
-  useEffect(() => {
-    const on = (e: Event) => { const v = (e as CustomEvent<string>).detail; setService(SERVICES_LIST.includes(v) ? v : ""); setState((s) => (s === "done" ? "idle" : s)); };
-    window.addEventListener("lm:service", on); return () => window.removeEventListener("lm:service", on);
-  }, []);
-
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const fd = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
-    if (fd["website"]) return setState("done");
-    const r = leadSchema.safeParse(fd);
-    if (!r.success) { setErrors(Object.fromEntries(r.error.issues.map((i) => [String(i.path[0]), i.message]))); return; }
-    setErrors({}); setState("sending");
-    const { error } = await supabase.from("leads").insert({ name: r.data.name, email: r.data.email, genre: r.data.genre ?? null, service: r.data.service ?? null, details: r.data.details ?? null });
-    setState(error ? "error" : "done");
-  }
-
   return (
     <section id="contact" className="relative px-5 py-24">
-      <SectionHead eyebrow="Contact" title={<>Let's talk about <span className="text-gold-gradient">your book</span></>} sub="Send a short message. We reply within 24 hours." />
+      <SectionHead eyebrow="Contact" title={<>Let's talk about <span className="text-gold-gradient">your book</span></>} sub="Answer a few quick steps. We reply within 24 hours." />
       <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1fr_1.2fr]">
         <Reveal className="glass relative overflow-hidden rounded-3xl p-8">
           <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-cyan/10 blur-3xl" />
@@ -52,24 +27,7 @@ export function Contact() {
           </div>
         </Reveal>
         <Reveal delay={0.1} className="glass rounded-3xl p-6 sm:p-8">
-          {state === "done" ? (
-            <div className="py-16 text-center">
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}><CheckCircle2 className="mx-auto h-20 w-20 text-gold" /></motion.div>
-              <h3 className="mt-4 text-3xl font-semibold">Message sent!</h3>
-              <p className="mt-2 text-muted-foreground">Thank you. We'll be in touch within 24 hours.</p>
-            </div>
-          ) : (
-            <form onSubmit={submit} noValidate className="grid gap-3 sm:grid-cols-2">
-              <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
-              <div><input name="name" placeholder="Your name" aria-label="Your name" aria-invalid={!!errors["name"]} aria-describedby={errors["name"] ? "err-name" : undefined} maxLength={120} className={fieldCls} />{errors["name"] && <p id="err-name" role="alert" className="mt-1 text-xs text-destructive">{errors["name"]}</p>}</div>
-              <div><input name="email" type="email" placeholder="Email address" aria-label="Email" aria-invalid={!!errors["email"]} aria-describedby={errors["email"] ? "err-email" : undefined} maxLength={255} className={fieldCls} />{errors["email"] && <p id="err-email" role="alert" className="mt-1 text-xs text-destructive">{errors["email"]}</p>}</div>
-              <select name="genre" defaultValue="" aria-label="Book genre" className={fieldCls}><option value="" disabled>Book genre</option>{GENRES.map((g) => <option key={g}>{g}</option>)}</select>
-              <select name="service" value={service} onChange={(e) => setService(e.target.value)} aria-label="Service needed" className={fieldCls}><option value="" disabled>Service needed</option>{SERVICES_LIST.map((g) => <option key={g}>{g}</option>)}</select>
-              <textarea name="details" rows={5} placeholder="Tell us about your book and goals" aria-label="Project details" maxLength={3000} className={`${fieldCls} sm:col-span-2`} />
-              {state === "error" && <p role="alert" className="text-sm text-destructive sm:col-span-2">Something went wrong. Please message us on <a href={CONTACT.whatsapp} target="_blank" rel="noopener" className="underline">WhatsApp</a> or email <a href={`mailto:${CONTACT.email}`} className="underline">{CONTACT.email}</a>.</p>}
-              <GlowButton type="submit" disabled={state === "sending"} className="sm:col-span-2">{state === "sending" ? "Sending…" : "Send Message"}</GlowButton>
-            </form>
-          )}
+          <EnquiryFlow />
         </Reveal>
       </div>
     </section>
@@ -136,7 +94,7 @@ export function FloatingBars() {
         <MessageCircle className="h-7 w-7" />
       </a>
       <div className="glass fixed inset-x-3 bottom-3 z-40 grid grid-cols-2 gap-2 rounded-full p-2 md:hidden">
-        <a href={BOOKING_URL} target="_blank" rel="noopener" className="grid min-h-11 place-items-center rounded-full bg-gold-gradient text-sm font-semibold text-primary-foreground">Book a Call</a>
+        <a href={BOOKING_URL} target="_blank" rel="noopener" onClick={() => trackEvent("cta_click", { cta: "mobile_book_call" })} className="grid min-h-11 place-items-center rounded-full bg-gold-gradient text-sm font-semibold text-primary-foreground">Book a Call</a>
         <a href={CONTACT.whatsapp} target="_blank" rel="noopener" className="grid min-h-11 place-items-center rounded-full border text-sm font-semibold">WhatsApp</a>
       </div>
     </>

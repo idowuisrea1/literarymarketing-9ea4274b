@@ -1,3 +1,4 @@
+import { RESULT_METRICS, TESTIMONIALS as TESTIMONIALS_CFG } from "@/config/site";
 import { motion, useInView, animate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { BookOpen, Compass, Infinity as Loop, Quote } from "lucide-react";
@@ -65,29 +66,20 @@ function Spark({ seed }: { seed: number }) {
   );
 }
 
-const METRICS = [
-  { l: "Followers gained", to: 12480, s: "+" },
-  { l: "Emails delivered", to: 86200, s: "" },
-  { l: "Open rate", to: 48.6, s: "%", d: 1 },
-  { l: "Pre-orders", to: 1340, s: "" },
-];
-
-const TESTIMONIALS = [
-  { q: "Placeholder testimonial — your client's words about their launch go here.", n: "Author Name", r: "Fantasy Novelist" },
-  { q: "Placeholder testimonial — a short quote about growth and results.", n: "Author Name", r: "Romance Author" },
-  { q: "Placeholder testimonial — what it felt like to work with literarymarketing.", n: "Publisher Name", r: "Indie Press" },
-];
+const METRICS = RESULT_METRICS.map((m) => ({ l: m.label, to: m.value, s: m.suffix ?? "", d: m.decimals ?? 0 }));
+const TESTIMONIALS = TESTIMONIALS_CFG.map((t) => ({ q: t.quote, n: t.name, r: t.role }));
 
 export function Results() {
   const [i, setI] = useState(0);
-  useEffect(() => { const t = setInterval(() => setI((x) => (x + 1) % TESTIMONIALS.length), 5000); return () => clearInterval(t); }, []);
-  const t = TESTIMONIALS[i]!;
+  useEffect(() => {
+    if (TESTIMONIALS.length < 2) return; const t = setInterval(() => setI((x) => (x + 1) % TESTIMONIALS.length), 5000); return () => clearInterval(t); }, []);
+  const t = TESTIMONIALS[i];
+  if (!METRICS.length && !t) return null; // shown only when real data exists in src/config/site.ts
   return (
     <section id="results" className="px-5 py-24">
-      <SectionHead eyebrow="Results" title={<>What growth <span className="text-gold-gradient">looks like</span></>} sub="A sample campaign dashboard, so you can see what we track for you." />
+      <SectionHead eyebrow="Results" title={<>What growth <span className="text-gold-gradient">looks like</span></>} sub="Real results from author campaigns." />
       <div className="mx-auto max-w-6xl">
-        <p className="mb-4 text-center font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">⚠ Sample campaign dashboard · illustrative numbers, not client results</p>
-        <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4">
+        {METRICS.length > 0 && <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4">
           {METRICS.map((m, k) => (
             <Reveal key={m.l} delay={k * 0.08}>
               <Tilt max={6}>
@@ -99,11 +91,11 @@ export function Results() {
               </Tilt>
             </Reveal>
           ))}
-        </div>
-        <Reveal className="glass mx-auto mt-10 max-w-3xl rounded-3xl p-8 text-center">
+        </div>}
+        {t && <Reveal className="glass mx-auto mt-10 max-w-3xl rounded-3xl p-8 text-center">
           <Quote className="mx-auto h-8 w-8 text-gold" />
           <motion.blockquote key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-4 font-serif text-2xl leading-snug sm:text-3xl">"{t.q}"</motion.blockquote>
-          <p className="mt-4 text-sm text-muted-foreground">{t.n} · {t.r} <span className="ml-2 font-mono text-[10px] uppercase text-cyan">placeholder</span></p>
+          <p className="mt-4 text-sm text-muted-foreground">{t.n} · {t.r}</p>
           <div className="mt-5 flex justify-center gap-2">
             {TESTIMONIALS.map((_, k) => (
               <button key={k} onClick={() => setI(k)} aria-label={`Testimonial ${k + 1}`} className="grid h-11 w-11 place-items-center">
@@ -111,7 +103,7 @@ export function Results() {
               </button>
             ))}
           </div>
-        </Reveal>
+        </Reveal>}
       </div>
     </section>
   );
