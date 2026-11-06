@@ -37,8 +37,11 @@ export function Hero() {
   useEffect(() => {
     const ok = window.matchMedia("(min-width: 1024px)").matches && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!ok) return;
-    const id = setTimeout(() => setShow3D(true), 400);
-    return () => clearTimeout(id);
+    // Load the 3D book only after the page has painted and the browser is idle.
+    let id = 0;
+    const start = () => { id = window.setTimeout(() => setShow3D(true), 600); };
+    if (document.readyState === "complete") start(); else window.addEventListener("load", start, { once: true });
+    return () => { clearTimeout(id); window.removeEventListener("load", start); };
   }, []);
 
   const word = (w: string, i: number, accent = false) => (

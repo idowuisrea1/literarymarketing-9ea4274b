@@ -2,6 +2,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useRef, type ReactNode, type MouseEvent, type ButtonHTMLAttributes, type AnchorHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { KineticHeading } from "./KineticHeading";
+import { trackEvent } from "@/lib/analytics";
 
 export function Reveal({ children, delay = 0, className }: { children: ReactNode; delay?: number; className?: string }) {
   const reduce = useReducedMotion();
@@ -95,6 +96,7 @@ export function scrollToId(id: string) {
 
 /** Scroll to the contact form and pre-select a service. */
 export function openQuote(service: string) {
+  trackEvent("cta_click", { cta: "quote", service });
   window.dispatchEvent(new CustomEvent("lm:service", { detail: service }));
   scrollToId("contact");
 }

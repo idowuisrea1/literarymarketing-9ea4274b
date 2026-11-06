@@ -5,6 +5,8 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { GENRES, ONE_TIME, ORDER_OPTIONS, PACKAGES } from "@/data/site";
 import { PackageQuiz } from "./Quiz";
+import { PackageCompare } from "./PackageCompare";
+import { RoiCalculator } from "./RoiCalculator";
 import { GlowButton, Reveal, SectionHead, Tilt } from "./primitives";
 import { cn } from "@/lib/utils";
 
@@ -104,6 +106,7 @@ export function Pricing() {
           </Reveal>
         ))}
       </div>
+      <PackageCompare />
       <Reveal className="mx-auto mt-24 max-w-6xl">
         <div className="mb-8 text-center">
           <h3 className="text-3xl font-semibold sm:text-4xl">One-Time <span className="text-gold-gradient">Projects</span></h3>
@@ -126,6 +129,7 @@ export function Pricing() {
         Need something custom?{" "}
         <button className="min-h-11 text-gold underline-offset-4 hover:underline" onClick={() => setPkg("Custom quote: Other")}>Tell us what you need →</button>
       </p>
+      <RoiCalculator />
       <PackageQuiz onPick={(name) => setPkg(name)} />
       <AnimatePresence>{pkg && <OrderModal pkg={pkg} onClose={() => setPkg(null)} />}</AnimatePresence>
     </section>

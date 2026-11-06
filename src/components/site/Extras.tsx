@@ -5,7 +5,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import a from "@/assets/pf";
 import logo from "@/assets/pf/logo.png.asset.json";
-import { CASE_STUDY_RESULT } from "@/config/site";
+import { CASE_STUDY_RESULT, isPlaceholderText } from "@/config/site";
 import { GlowButton, Reveal, SectionHead, openQuote } from "./primitives";
 import { fieldCls } from "./Pricing";
 import { ParticleLogo } from "./ParticleLogo";
@@ -40,7 +40,7 @@ export function WhyUs() {
 const STORY = [
   { i: Target, h: "Challenge", t: "A time-travel sci-fi romance with a huge hook (a baseball signed in 1908 with ink that shouldn't exist) had to explain itself in seconds on a crowded Amazon page and social feed." },
   { i: Wrench, h: "What we did", t: "We designed a one-glance book spotlight that turns the story's hook into five scannable moments, with the 3D book and e-reader mockups and a clear 'Available on Amazon' call to action." },
-  { i: Trophy, h: "Result", t: CASE_STUDY_RESULT },
+  ...(isPlaceholderText(CASE_STUDY_RESULT) ? [] : [{ i: Trophy, h: "Result", t: CASE_STUDY_RESULT }]),
 ];
 
 export function CaseStudy() {
@@ -56,7 +56,7 @@ export function CaseStudy() {
           </div>
         </Reveal>
         <div>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className={`grid gap-4 ${STORY.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
             {STORY.map((s, i) => (
               <Reveal key={s.h} delay={i * 0.12} className="glass rounded-2xl p-5">
                 <s.i className="h-6 w-6 text-cyan" />
@@ -147,8 +147,13 @@ export function LeadMagnet() {
 }
 
 export function LogoLoader() {
-  const [show, setShow] = useState(true);
-  useEffect(() => { const t = setTimeout(() => setShow(false), 1400); return () => clearTimeout(t); }, []);
+  // Brief intro, first visit only; skipped for reduced motion.
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    try { if (localStorage.getItem("lm-intro-seen") || matchMedia("(prefers-reduced-motion: reduce)").matches) return; localStorage.setItem("lm-intro-seen", "1"); } catch { return; }
+    setShow(true);
+    const t = setTimeout(() => setShow(false), 800); return () => clearTimeout(t);
+  }, []);
   return (
     <AnimatePresence>
       {show && (
