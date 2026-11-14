@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CONTACT, GENRES, ORDER_OPTIONS, SERVICES_LIST } from "@/data/site";
 import { BUDGETS, STAGES, TIMELINES, buildBrief, suggestPackage, type Answers } from "@/lib/enquiry";
 import { trackEvent } from "@/lib/analytics";
+import { sendToFormspree } from "@/lib/formspree";
 import { GlowButton } from "./primitives";
 import { fieldCls } from "./Pricing";
 import { cn } from "@/lib/utils";
@@ -64,13 +65,19 @@ export function EnquiryFlow() {
     for (const s of stepSchemas) if (!s.safeParse(a).success) { go(stepSchemas.indexOf(s)); return; }
     setState("sending");
     const brief = buildBrief(a);
-    const { error } = await supabase.from("leads").insert({
+    const lead = {
       name: a.name.trim(), email: a.email.trim(), genre: a.genre || null,
       service: (a.interest || a.services.join(", ")).slice(0, 100) || null,
       details: brief.slice(0, 3000),
-    });
-    setState(error ? "error" : "done");
-    if (!error) trackEvent("enquiry_submit", { services: a.services.length });
+    };
+    // Save to the database and email a copy via Formspree. Succeed if either works.
+    const [{ error }, mailed] = await Promise.all([
+      supabase.from("leads").insert(lead),
+      sendToFormspree("enquiry", { ...lead, _subject: `New enquiry from ${lead.name}`, brief, budget: a.budget, timeline: a.timeline, stage: a.stage, book_title: a.title }),
+    ]);
+    const ok = !error || mailed;
+    setState(ok ? "done" : "error");
+    if (ok) trackEvent("enquiry_submit", { services: a.services.length });
   }
 
   const err = (k: string) => errors[k] ? { "aria-invalid": true as const, "aria-describedby": `${uid}-${k}-err` } : {};

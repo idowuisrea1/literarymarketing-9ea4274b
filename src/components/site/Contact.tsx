@@ -8,6 +8,7 @@ import { BOOKING_URL, CONTACT, isPlaceholder } from "@/data/site";
 import { GlowButton, GlowLink, Reveal, SectionHead } from "./primitives";
 import { EnquiryFlow } from "./EnquiryFlow";
 import { trackEvent } from "@/lib/analytics";
+import { sendToFormspree } from "@/lib/formspree";
 import { fieldCls } from "./Pricing";
 
 export function Contact() {
@@ -42,8 +43,11 @@ function Newsletter() {
     if (fd.get("website")) return setS("done");
     const r = z.string().trim().email().max(255).safeParse(fd.get("email"));
     if (!r.success) return setS("error");
-    const { error } = await supabase.from("newsletter_subscribers").insert({ email: r.data });
-    setS(!error || error.code === "23505" ? "done" : "error");
+    const [{ error }, mailed] = await Promise.all([
+      supabase.from("newsletter_subscribers").insert({ email: r.data }),
+      sendToFormspree("signup", { email: r.data, kind: "newsletter", _subject: "New newsletter signup" }),
+    ]);
+    setS(!error || error.code === "23505" || mailed ? "done" : "error");
   }
   if (s === "done") return <p className="text-sm text-gold">You're on the list ✦</p>;
   return (

@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import a from "@/assets/pf";
 import logo from "@/assets/pf/logo.png.asset.json";
 import { CASE_STUDY_RESULT, isPlaceholderText } from "@/config/site";
+import { sendToFormspree } from "@/lib/formspree";
 import { GlowButton, Reveal, SectionHead, openQuote } from "./primitives";
 import { fieldCls } from "./Pricing";
 import { ParticleLogo } from "./ParticleLogo";
@@ -97,8 +98,11 @@ export function LeadMagnet() {
     const r = z.string().trim().email().max(255).safeParse(fd.get("email"));
     if (!r.success) return setS("error");
     setS("sending");
-    const { error } = await supabase.from("newsletter_subscribers").insert({ email: r.data });
-    setS(!error || error.code === "23505" ? "done" : "error");
+    const [{ error }, mailed] = await Promise.all([
+      supabase.from("newsletter_subscribers").insert({ email: r.data }),
+      sendToFormspree("signup", { email: r.data, kind: "checklist", _subject: "New checklist signup" }),
+    ]);
+    setS(!error || error.code === "23505" || mailed ? "done" : "error");
   }
   return (
     <section id="checklist" className="px-5 py-24">
