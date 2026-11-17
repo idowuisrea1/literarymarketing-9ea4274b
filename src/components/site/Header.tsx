@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import logo from "@/assets/pf/logo.png.asset.json";
 import { GlowLink } from "./primitives";
@@ -37,6 +38,7 @@ export function Header() {
           {NAV.map(([l, id]) => (
             <a key={id} href={`#${id}`} className="text-sm text-muted-foreground transition-colors hover:text-gold">{l}</a>
           ))}
+          <Link to="/author-website-showcase" className="text-sm text-muted-foreground transition-colors hover:text-gold">Website Designs</Link>
         </nav>
         <div className="flex items-center gap-2">
           <SoundToggle />
@@ -52,7 +54,7 @@ export function Header() {
           <motion.div className="fixed inset-0 z-50 lg:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" onClick={() => setOpen(false)} />
             <motion.aside
-              className="glass absolute right-0 top-0 flex h-full w-[82%] max-w-sm flex-col gap-2 p-6"
+              className="glass absolute right-0 top-0 flex h-full w-[82%] max-w-sm flex-col gap-2 overflow-y-auto p-6"
               initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 28, stiffness: 260 }}
             >
               <button onClick={() => setOpen(false)} className="ml-auto grid h-11 w-11 place-items-center rounded-full glass" aria-label="Close menu"><X className="h-5 w-5" /></button>
@@ -62,6 +64,7 @@ export function Header() {
                   {l}
                 </motion.a>
               ))}
+              <Link to="/author-website-showcase" onClick={() => setOpen(false)} className="border-b py-4 font-serif text-3xl">Website Designs</Link>
               <GlowLink href="#contact" onClick={() => setOpen(false)} className="mt-6">Contact Us</GlowLink>
             </motion.aside>
           </motion.div>

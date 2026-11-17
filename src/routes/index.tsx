@@ -9,6 +9,7 @@ import { Pricing } from "@/components/site/Pricing";
 import { About, FAQ } from "@/components/site/About";
 import { WhyUs, CaseStudy, LeadMagnet, LogoLoader } from "@/components/site/Extras";
 import { Contact, Footer, FloatingBars } from "@/components/site/Contact";
+import { ShowcaseTeaser } from "@/components/site/ShowcaseTeaser";
 
 const TITLE = "literarymarketing — Book Marketing for Authors & Publishers";
 const DESC = "Social media management, automated email marketing, author websites, book trailers and cover design for authors, novelists and publishers.";
@@ -58,6 +59,7 @@ function Index() {
         <Services />
         <AllServices />
         <Portfolio />
+        <ShowcaseTeaser />
         <CaseStudy />
         <Process />
         <Results />
