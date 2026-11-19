@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthorWebsiteShowcaseRouteImport } from './routes/author-website-showcase'
+import { Route as AuthorWebsiteShowcaseBestsellerRouteImport } from './routes/author-website-showcase_.bestseller'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +24,63 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthorWebsiteShowcaseRoute = AuthorWebsiteShowcaseRouteImport.update({
+  id: '/author-website-showcase',
+  path: '/author-website-showcase',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthorWebsiteShowcaseBestsellerRoute =
+  AuthorWebsiteShowcaseBestsellerRouteImport.update({
+    id: '/author-website-showcase_/bestseller',
+    path: '/author-website-showcase/bestseller',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/author-website-showcase': typeof AuthorWebsiteShowcaseRoute
+  '/author-website-showcase/bestseller': typeof AuthorWebsiteShowcaseBestsellerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/author-website-showcase': typeof AuthorWebsiteShowcaseRoute
+  '/author-website-showcase/bestseller': typeof AuthorWebsiteShowcaseBestsellerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/author-website-showcase': typeof AuthorWebsiteShowcaseRoute
+  '/author-website-showcase_/bestseller': typeof AuthorWebsiteShowcaseBestsellerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/author-website-showcase'
+    | '/author-website-showcase/bestseller'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin'
-  id: '__root__' | '/' | '/admin'
+  to:
+    | '/'
+    | '/admin'
+    | '/author-website-showcase'
+    | '/author-website-showcase/bestseller'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/author-website-showcase'
+    | '/author-website-showcase_/bestseller'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AuthorWebsiteShowcaseRoute: typeof AuthorWebsiteShowcaseRoute
+  AuthorWebsiteShowcaseBestsellerRoute: typeof AuthorWebsiteShowcaseBestsellerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +99,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/author-website-showcase': {
+      id: '/author-website-showcase'
+      path: '/author-website-showcase'
+      fullPath: '/author-website-showcase'
+      preLoaderRoute: typeof AuthorWebsiteShowcaseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/author-website-showcase_/bestseller': {
+      id: '/author-website-showcase_/bestseller'
+      path: '/author-website-showcase/bestseller'
+      fullPath: '/author-website-showcase/bestseller'
+      preLoaderRoute: typeof AuthorWebsiteShowcaseBestsellerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AuthorWebsiteShowcaseRoute: AuthorWebsiteShowcaseRoute,
+  AuthorWebsiteShowcaseBestsellerRoute: AuthorWebsiteShowcaseBestsellerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
