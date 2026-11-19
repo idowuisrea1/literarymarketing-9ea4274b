@@ -15,6 +15,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { MotionDirector } from "../components/site/MotionDirector";
+import { SalesNotifications } from "../components/site/SalesNotifications";
 
 function NotFoundComponent() {
   return (
@@ -128,6 +129,7 @@ function RootComponent() {
           <Outlet />
         </motion.div>
       </AnimatePresence>
+      <SalesNotifications />
     </QueryClientProvider>
   );
 }
