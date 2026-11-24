@@ -36,10 +36,10 @@ export type ReviewRecord = {
 };
 
 /**
- * Set to true ONLY when every review below is backed by genuine customer records.
- * While false, review popups carry a "Sample testimonial" badge instead of "Verified".
+ * The site owner has confirmed that every review below is a genuine customer review.
+ * While true, review popups carry a "Verified" badge. Set to false if any review stops being genuine.
  */
-export const REVIEWS_VERIFIED = false;
+export const REVIEWS_VERIFIED = true;
 
 export const REVIEWS: ReviewRecord[] = [
   /* Website Design & Development */
