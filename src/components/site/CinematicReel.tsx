@@ -4,6 +4,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, MoveHorizontal } from "lucide-react";
 import { WORKS } from "@/data/site";
 import assets from "@/assets/pf";
 import { VisualErrorBoundary } from "./VisualErrorBoundary";
+import { YouTubeThumb } from "./YouTubeThumb";
 
 const LazyDisplacementImage = lazy(() => import("./DisplacementImage"));
 
@@ -94,12 +95,21 @@ export function CinematicReel({ onOpen }: { onOpen: (work: (typeof WORKS)[number
       }
     >
       {works.map((work, index) => {
-        const image = work.youtube
-          ? `https://i.ytimg.com/vi/${work.youtube}/hqdefault.jpg`
-          : work.img;
-        const fallbackImage = image ? (
+        const fallbackImage = work.youtube ? (
+          <YouTubeThumb
+            id={work.youtube}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="lm-cinematic-image h-full w-full object-cover"
+            initial={reduce ? false : { scale: 1.08, filter: "saturate(.72)" }}
+            whileInView={{ scale: 1, filter: "saturate(1)" }}
+            viewport={{ once: true, amount: 0.35 }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          />
+        ) : work.img ? (
           <motion.img
-            src={image}
+            src={work.img}
             alt=""
             loading="lazy"
             decoding="async"

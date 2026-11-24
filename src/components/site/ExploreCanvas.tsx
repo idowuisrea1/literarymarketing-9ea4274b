@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { Maximize, Minus, Plus } from "lucide-react";
 import { WORKS, type Work } from "@/data/site";
+import { YouTubeThumb } from "./YouTubeThumb";
 
 /**
  * Category 24 — Optional "Explore canvas" view of the existing portfolio.
@@ -115,27 +116,27 @@ export function ExploreCanvas({ onOpen, onExit }: { onOpen: (w: Work) => void; o
           className="absolute left-0 top-0"
           style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`, transformOrigin: "0 0" }}
         >
-          {items.map(({ w, x, y }) => {
-            const thumb = w.youtube ? `https://i.ytimg.com/vi/${w.youtube}/hqdefault.jpg` : w.img;
-            return (
-              <button
-                key={w.id}
-                type="button"
-                onClick={() => onOpen(w)}
-                className="group absolute w-44 overflow-hidden rounded-2xl border bg-card text-left shadow-2xl transition-transform hover:scale-105 focus-visible:scale-105 sm:w-52"
-                style={{ left: x, top: y }}
-              >
-                {thumb ? (
-                  <img src={thumb} alt="" loading="lazy" decoding="async" draggable={false}
-                    className="aspect-[4/5] w-full object-cover" />
-                ) : (
-                  <div className="grid aspect-[4/5] place-items-center bg-aurora" />
-                )}
-                <span className="block truncate px-3 py-2 text-xs font-medium">{w.title || "Book trailer"}</span>
-                <span className="block px-3 pb-2 font-mono text-[9px] uppercase text-cyan">{w.cat}</span>
-              </button>
-            );
-          })}
+          {items.map(({ w, x, y }) => (
+            <button
+              key={w.id}
+              type="button"
+              onClick={() => onOpen(w)}
+              className="group absolute w-44 overflow-hidden rounded-2xl border bg-card text-left shadow-2xl transition-transform hover:scale-105 focus-visible:scale-105 sm:w-52"
+              style={{ left: x, top: y }}
+            >
+              {w.youtube ? (
+                <YouTubeThumb id={w.youtube} alt="" loading="lazy" decoding="async" draggable={false}
+                  className="aspect-[4/5] w-full object-cover" />
+              ) : w.img ? (
+                <img src={w.img} alt="" loading="lazy" decoding="async" draggable={false}
+                  className="aspect-[4/5] w-full object-cover" />
+              ) : (
+                <div className="grid aspect-[4/5] place-items-center bg-aurora" />
+              )}
+              <span className="block truncate px-3 py-2 text-xs font-medium">{w.title || "Book trailer"}</span>
+              <span className="block px-3 pb-2 font-mono text-[9px] uppercase text-cyan">{w.cat}</span>
+            </button>
+          ))}
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ const CATEGORIES = ALL_CATS.filter((c) => c === "All" || WORKS.some((w) => w.cat
 import { GlowButton, Reveal, SectionHead, Tilt } from "./primitives";
 import { cn } from "@/lib/utils";
 import { CinematicReel } from "./CinematicReel";
+import { YouTubeThumb } from "./YouTubeThumb";
 
 const LazyExploreCanvas = lazy(() =>
   import("./ExploreCanvas").then((module) => ({ default: module.ExploreCanvas })),
@@ -56,7 +57,7 @@ function Card({ w, onOpen }: { w: Work; onOpen: () => void }) {
   const title = useTrailerTitle(w);
   const reduce = useReducedMotion();
   const [preview, setPreview] = useState(false);
-  const thumb = w.youtube ? `https://i.ytimg.com/vi/${w.youtube}/hqdefault.jpg` : w.img;
+  const thumb = w.youtube || w.img;
   return (
     <Tilt>
       <button
@@ -79,12 +80,22 @@ function Card({ w, onOpen }: { w: Work; onOpen: () => void }) {
             w.youtube ? "aspect-video" : "aspect-[4/5]",
           )}
         >
-          {thumb ? (
+          {w.youtube ? (
+            <YouTubeThumb
+              id={w.youtube}
+              alt={`${title} — ${w.cat}`}
+              width={1280}
+              height={720}
+              loading="lazy"
+              decoding="async"
+              className="lm-image-reveal h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : w.img ? (
             <img
-              src={thumb}
+              src={w.img}
               alt={`${title} — ${w.cat}`}
               width={480}
-              height={w.youtube ? 270 : 600}
+              height={600}
               loading="lazy"
               decoding="async"
               className="lm-image-reveal h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -189,9 +200,6 @@ export function Portfolio() {
             <div className="absolute inset-0" style={{ transformStyle: "preserve-3d" }}>
               {orbitWorks.map((w, i) => {
                 const angle = (360 / orbitWorks.length) * (i - orbitIndex);
-                const image = w.youtube
-                  ? `https://i.ytimg.com/vi/${w.youtube}/hqdefault.jpg`
-                  : w.img;
                 const visible = !reduce || i === orbitIndex;
                 return (
                   <button
@@ -210,9 +218,17 @@ export function Portfolio() {
                       zIndex: i === orbitIndex ? 2 : 1,
                     }}
                   >
-                    {image ? (
+                    {w.youtube ? (
+                      <YouTubeThumb
+                        id={w.youtube}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="aspect-[4/5] w-full object-cover"
+                      />
+                    ) : w.img ? (
                       <img
-                        src={image}
+                        src={w.img}
                         alt=""
                         loading="lazy"
                         decoding="async"
