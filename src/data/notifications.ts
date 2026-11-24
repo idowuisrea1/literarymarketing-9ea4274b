@@ -2,28 +2,25 @@
  * Sales / social-proof notification data.
  *
  * HONESTY RULES
- * - Project, message and service notices are SAMPLE content. They are shown with a visible SAMPLE or SERVICE badge.
- * - Review notices come only from REVIEWS below. Nothing is invented. Reviews are labelled
- *   "Sample testimonial" until you set `verified: true` for a review you can back with real records.
+ * - Project and enquiry notices are SAMPLE content. They are shown with a visible SAMPLE badge.
+ * - Service notices are factual service highlights and carry a SERVICE badge.
+ * - Review notices come only from src/data/reviews.ts. Nothing is invented. They are labelled
+ *   "Sample testimonial" until REVIEWS_VERIFIED is set to true in that file.
  * - No timestamps, purchase counts or "just now" claims are ever shown.
  */
 
-export type Kind = "project" | "message" | "review" | "service";
+import { REVIEWS, REVIEWS_VERIFIED, type ReviewGroup } from "./reviews";
 
-export type ReviewGroup =
-  | "website"
-  | "author-marketing"
-  | "marketplace"
-  | "publishing"
-  | "branding"
-  | "experience"
-  | "premium";
+export type Kind = "project" | "message" | "review" | "service";
 
 export type Notice = {
   id: string;
   kind: Kind;
   title: string;
+  /** Text shown in the popup (a short excerpt for reviews). */
   text: string;
+  /** Complete original review text, shown when the visitor expands the popup. */
+  full?: string;
   name?: string;
   rating?: number;
   group?: ReviewGroup;
@@ -40,7 +37,7 @@ export const NOTICE_CONFIG = {
   durationMs: 6500,
   maxPerSession: 10,
   /** How many recent notices to avoid repeating. Must be smaller than the total pool. */
-  recentMemory: 6,
+  recentMemory: 12,
 };
 
 /* ---------- A. Project completion (sample) ---------- */
@@ -74,17 +71,7 @@ const SERVICES: Notice[] = [
   { id: "s-brand", kind: "service", sample: false, title: "Branding & Creative Design", text: "Brand identity and creative design for authors and businesses." },
 ];
 
-/* ---------- C. Reviews ----------
- * PASTE YOUR REAL TESTIMONIALS HERE (original names and wording). Example shape:
- *
- *   { name: "Reviewer Name", group: "website", text: "Full original review text.", short: "Optional shorter version.", verified: false },
- *
- * The review collection was not included in the request, so this list is empty and no review
- * notifications are shown until you add some. Nothing is invented.
- */
-export type Review = { name: string; group: ReviewGroup; text: string; short?: string; rating?: number; verified?: boolean };
-export const REVIEWS: Review[] = [];
-
+/* ---------- C. Reviews (data lives in src/data/reviews.ts) ---------- */
 export function shorten(text: string, max = 150): string {
   if (text.length <= max) return text;
   const cut = text.slice(0, max);
@@ -93,16 +80,17 @@ export function shorten(text: string, max = 150): string {
   return cut.slice(0, cut.lastIndexOf(" ")).replace(/[,;:\s]+$/, "") + "…";
 }
 
-const REVIEW_NOTICES: Notice[] = REVIEWS.map((r, i) => ({
-  id: `r-${i}`,
+const REVIEW_NOTICES: Notice[] = REVIEWS.map((r) => ({
+  id: r.id,
   kind: "review" as const,
   title: "5-Star Review",
-  text: r.short ?? shorten(r.text),
+  text: r.excerpt ?? shorten(r.review),
+  full: r.review,
   name: r.name,
-  rating: r.rating ?? 5,
-  group: r.group,
-  sample: !r.verified,
-  verified: !!r.verified,
+  rating: r.rating,
+  group: r.category,
+  sample: !REVIEWS_VERIFIED,
+  verified: REVIEWS_VERIFIED,
 }));
 
 export const NOTICES: Notice[] = [...PROJECTS, ...MESSAGES, ...REVIEW_NOTICES, ...SERVICES];

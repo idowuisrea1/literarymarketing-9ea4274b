@@ -33,14 +33,24 @@ function Badge({ n }: { n: Notice }) {
 
 function Card({ n, reduce, onClose, onOff, onEnter, onLeave }: { n: Notice; reduce: boolean; onClose: () => void; onOff: () => void; onEnter: () => void; onLeave: () => void }) {
   const Icon = ICON[n.kind];
+  const [open, setOpen] = useState(false);
+  const canExpand = n.kind === "review" && !!n.full && n.full !== n.text;
+  const body = open && n.full ? n.full : n.text;
+  // While expanded, keep the popup on screen until the visitor closes or collapses it.
+  const leave = () => { if (!open) onLeave(); };
+  const toggle = () => {
+    const next = !open;
+    setOpen(next);
+    if (next) { onEnter(); trackEvent("sales_notice_expand", { id: n.id }); } else onLeave();
+  };
   return (
     <motion.div
-      onMouseEnter={onEnter} onMouseLeave={onLeave} onFocusCapture={onEnter} onBlurCapture={onLeave}
+      onMouseEnter={onEnter} onMouseLeave={leave} onFocusCapture={onEnter} onBlurCapture={leave}
       initial={reduce ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={reduce ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
       transition={{ duration: reduce ? 0.15 : 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="glass pointer-events-auto relative overflow-hidden rounded-2xl border p-3.5 pr-10 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.7)]"
+      className={cn("glass pointer-events-auto relative overflow-hidden rounded-2xl border p-3.5 pr-10 shadow-[0_18px_50px_-18px_rgba(0,0,0,0.7)]", open && "max-h-[70vh] overflow-y-auto")}
     >
       <button type="button" onClick={onClose} aria-label="Close notification" className="absolute right-0 top-0 grid h-11 w-11 place-items-center text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <X className="h-4 w-4" aria-hidden="true" />
@@ -58,9 +68,14 @@ function Card({ n, reduce, onClose, onOff, onEnter, onLeave }: { n: Notice; redu
               {Array.from({ length: n.rating ?? 5 }).map((_, i) => <Star key={i} className="h-3.5 w-3.5 fill-current" aria-hidden="true" />)}
             </span>
           )}
-          <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">{n.kind === "review" || n.kind === "message" ? `“${n.text}”` : n.text}</p>
+          <p className={cn("mt-1 text-sm text-muted-foreground", !open && "line-clamp-3")}>{n.kind === "review" || n.kind === "message" ? `“${body}”` : body}</p>
           {n.kind === "review" && n.name && <p className="mt-1 text-xs text-foreground/80">— {n.name}</p>}
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+          {canExpand && (
+            <button type="button" onClick={toggle} aria-expanded={open} className="mt-1 inline-flex min-h-8 items-center text-xs font-semibold text-cyan underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              {open ? "Show less" : "Read full review"}
+            </button>
+          )}
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
             <Badge n={n} />
             <a href="/#contact" onClick={() => trackEvent("sales_notice_click", { kind: n.kind, id: n.id })} className="inline-flex min-h-8 items-center text-xs font-semibold text-gold underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Start an enquiry</a>
             <button type="button" onClick={onOff} className="inline-flex min-h-8 items-center text-xs text-muted-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Turn off</button>
