@@ -23,6 +23,8 @@ export const GENRES = [
 
 export const STYLES = ["cinematic", "minimalist", "editorial", "literary", "luxury", "colorful", "immersive"] as const;
 
+export type DemoPath = "/author-website-showcase/bestseller" | "/author-website-showcase/literary";
+
 export type Sample = {
   id: string;
   number: string;
@@ -34,7 +36,7 @@ export type Sample = {
   features: string[];
   status: "live" | "planned";
   /** Only set when the route really exists. */
-  demoPath?: "/author-website-showcase/bestseller";
+  demoPath?: DemoPath;
   cover: { title: string; author: string; from: string; to: string };
 };
 
@@ -48,11 +50,11 @@ export const SAMPLES: Sample[] = [
     cover: { title: "Ninety Days to Midnight", author: "Dane Corvin", from: "#7a0f14", to: "#e5322d" },
   },
   {
-    id: "literary", number: "02", name: "Literary Fiction Author", status: "planned",
+    id: "literary", number: "02", name: "Literary Fiction Author", status: "live", demoPath: "/author-website-showcase/literary",
     audience: "Literary novelists and short-story writers.",
     objective: "Signal artistic quality and credibility with restraint.",
     genres: ["fiction"], styles: ["literary", "minimalist", "editorial"],
-    features: ["Editorial typography", "Selected publications", "Literary reviews", "Events list"],
+    features: ["Left-rail editorial navigation", "A section for every book, with excerpts", "Filterable selected publications", "Reviews reader", "Events list with filters"],
     cover: { title: "The Quiet Orchard", author: "Imani Lowe", from: "#2f3b34", to: "#a8b5a0" },
   },
   {
@@ -135,4 +137,7 @@ export const REFERENCES = [
   { name: "Colleen Coble", url: "https://colleencoble.com/", sample: "01", observed: "Clean layout with newsletter signup and dedicated areas for books and media.", used: "Separate backlist, media and newsletter sections with clear headings." },
   { name: "James Patterson", url: "https://www.jamespatterson.com/", sample: "01", observed: "Mailing list, shareable books and latest trailers.", used: "Trailer preview and newsletter are first-class sections." },
   { name: "Nora Roberts", url: "https://noraroberts.com/", sample: "01", observed: "Robust books section with a release schedule and a full book list.", used: "Browsable backlist grouped by series." },
+  { name: "Nicole Krauss", url: "https://www.nicolekrauss.com/", sample: "02", observed: "Navigation sits on the left instead of the top, with a page for each book.", used: "A calm left-hand navigation rail and a dedicated section for every book." },
+  { name: "Julie Orringer", url: "https://julieorringer.com/", sample: "02", observed: "Each book has its own page with a description, reviews and purchase links.", used: "Every book gets its own block with blurb, excerpt and where-to-buy links." },
+  { name: "Jodi Picoult", url: "https://www.jodipicoult.com/", sample: "02", observed: "A simple white background lets the photo and book pages stand out.", used: "Plain ivory page, restrained palette and generous whitespace." },
 ] as const;

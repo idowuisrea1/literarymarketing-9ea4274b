@@ -128,12 +128,13 @@ function Showcase() {
 
         <section aria-label="Design research" className="mx-auto max-w-5xl px-5 pb-24">
           <details className="glass rounded-2xl p-5">
-            <summary className="min-h-11 cursor-pointer font-semibold">Design research behind Sample 01</summary>
+            <summary className="min-h-11 cursor-pointer font-semibold">Design research behind the samples</summary>
             <p className="mt-3 text-sm text-muted-foreground">These are independent concepts inspired by general design principles noted in <a className="text-gold underline" href={REFERENCE_SOURCE} target="_blank" rel="noopener noreferrer">Scott Lorenz's article on author websites</a>. They are not redesigns of those sites, no code, layout, artwork or text was reused, and Literarymarketing is not affiliated with any author listed. The observations below come from the article's descriptions.</p>
             <ul className="mt-4 grid gap-3 sm:grid-cols-2">
               {REFERENCES.map((r) => (
                 <li key={r.name} className="rounded-xl border p-4 text-sm">
                   <a href={r.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-gold underline">{r.name}</a>
+                  <span className="ml-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Sample {r.sample}</span>
                   <p className="mt-1 text-muted-foreground"><span className="text-foreground">Observed:</span> {r.observed}</p>
                   <p className="mt-1 text-muted-foreground"><span className="text-foreground">Our take:</span> {r.used}</p>
                 </li>
