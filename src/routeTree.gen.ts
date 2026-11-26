@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthorWebsiteShowcaseRouteImport } from './routes/author-website-showcase'
 import { Route as AuthorWebsiteShowcaseBestsellerRouteImport } from './routes/author-website-showcase_.bestseller'
+import { Route as AuthorWebsiteShowcaseDirectoryRouteImport } from './routes/author-website-showcase_.directory'
+import { Route as AuthorWebsiteShowcaseLiteraryRouteImport } from './routes/author-website-showcase_.literary'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -35,18 +37,34 @@ const AuthorWebsiteShowcaseBestsellerRoute =
     path: '/author-website-showcase/bestseller',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthorWebsiteShowcaseDirectoryRoute =
+  AuthorWebsiteShowcaseDirectoryRouteImport.update({
+    id: '/author-website-showcase_/directory',
+    path: '/author-website-showcase/directory',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthorWebsiteShowcaseLiteraryRoute =
+  AuthorWebsiteShowcaseLiteraryRouteImport.update({
+    id: '/author-website-showcase_/literary',
+    path: '/author-website-showcase/literary',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/author-website-showcase': typeof AuthorWebsiteShowcaseRoute
   '/author-website-showcase/bestseller': typeof AuthorWebsiteShowcaseBestsellerRoute
+  '/author-website-showcase/directory': typeof AuthorWebsiteShowcaseDirectoryRoute
+  '/author-website-showcase/literary': typeof AuthorWebsiteShowcaseLiteraryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/author-website-showcase': typeof AuthorWebsiteShowcaseRoute
   '/author-website-showcase/bestseller': typeof AuthorWebsiteShowcaseBestsellerRoute
+  '/author-website-showcase/directory': typeof AuthorWebsiteShowcaseDirectoryRoute
+  '/author-website-showcase/literary': typeof AuthorWebsiteShowcaseLiteraryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -54,6 +72,8 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/author-website-showcase': typeof AuthorWebsiteShowcaseRoute
   '/author-website-showcase_/bestseller': typeof AuthorWebsiteShowcaseBestsellerRoute
+  '/author-website-showcase_/directory': typeof AuthorWebsiteShowcaseDirectoryRoute
+  '/author-website-showcase_/literary': typeof AuthorWebsiteShowcaseLiteraryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -62,18 +82,24 @@ export interface FileRouteTypes {
     | '/admin'
     | '/author-website-showcase'
     | '/author-website-showcase/bestseller'
+    | '/author-website-showcase/directory'
+    | '/author-website-showcase/literary'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/author-website-showcase'
     | '/author-website-showcase/bestseller'
+    | '/author-website-showcase/directory'
+    | '/author-website-showcase/literary'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/author-website-showcase'
     | '/author-website-showcase_/bestseller'
+    | '/author-website-showcase_/directory'
+    | '/author-website-showcase_/literary'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -81,6 +107,8 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthorWebsiteShowcaseRoute: typeof AuthorWebsiteShowcaseRoute
   AuthorWebsiteShowcaseBestsellerRoute: typeof AuthorWebsiteShowcaseBestsellerRoute
+  AuthorWebsiteShowcaseDirectoryRoute: typeof AuthorWebsiteShowcaseDirectoryRoute
+  AuthorWebsiteShowcaseLiteraryRoute: typeof AuthorWebsiteShowcaseLiteraryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -113,6 +141,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthorWebsiteShowcaseBestsellerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/author-website-showcase_/directory': {
+      id: '/author-website-showcase_/directory'
+      path: '/author-website-showcase/directory'
+      fullPath: '/author-website-showcase/directory'
+      preLoaderRoute: typeof AuthorWebsiteShowcaseDirectoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/author-website-showcase_/literary': {
+      id: '/author-website-showcase_/literary'
+      path: '/author-website-showcase/literary'
+      fullPath: '/author-website-showcase/literary'
+      preLoaderRoute: typeof AuthorWebsiteShowcaseLiteraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -121,6 +163,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthorWebsiteShowcaseRoute: AuthorWebsiteShowcaseRoute,
   AuthorWebsiteShowcaseBestsellerRoute: AuthorWebsiteShowcaseBestsellerRoute,
+  AuthorWebsiteShowcaseDirectoryRoute: AuthorWebsiteShowcaseDirectoryRoute,
+  AuthorWebsiteShowcaseLiteraryRoute: AuthorWebsiteShowcaseLiteraryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
