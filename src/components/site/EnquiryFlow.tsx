@@ -80,6 +80,13 @@ export function EnquiryFlow() {
     if (ok) trackEvent("enquiry_submit", { services: a.services.length });
   }
 
+  // Steps 1-4 validate and advance; the last step sends the enquiry.
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (step < 4) next();
+    else void send();
+  }
+
   const err = (k: string) => errors[k] ? { "aria-invalid": true as const, "aria-describedby": `${uid}-${k}-err` } : {};
   const Err = ({ k }: { k: string }) => errors[k] ? <p id={`${uid}-${k}-err`} className="mt-1 text-xs text-destructive">{errors[k]}</p> : null;
   const label = "mb-1.5 block text-sm font-medium text-foreground";
@@ -97,7 +104,7 @@ export function EnquiryFlow() {
   const brief = buildBrief(a);
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); step < 4 ? next() : void send(); }} noValidate aria-labelledby={`${uid}-h`}>
+    <form onSubmit={handleSubmit} noValidate aria-labelledby={`${uid}-h`}>
       <input ref={honey} type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
       <ol className="mb-5 flex gap-1.5" aria-label="Progress">
         {STEPS.map((s, i) => (
